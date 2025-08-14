@@ -1,0 +1,104 @@
+export interface Crop {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+  name: string;
+  location?: string | null;
+  area?: number | null;
+  amount?: number | null;
+  started_date?: string | null;
+}
+
+export type CropFormData = Omit<Crop, 'id' | 'created_at' | 'updated_at' | 'user_id'>;
+
+export interface Category {
+  id: string;
+  created_at: string;
+  user_id: string;
+  name: string;
+  type: 'income' | 'expense';
+}
+
+export interface Expense {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+  expense_date: string;
+  amount: number;
+  detail?: string | null;
+  crop_id: string;
+  category_id?: string | null;
+  // The following fields are for display purposes after joining tables
+  crops?: { name: string };
+  categories?: { name: string };
+}
+
+export type ExpenseFormData = {
+  expense_date: string;
+  amount: number;
+  detail?: string;
+  crop_id: string;
+  // For the form, we'll handle category as a string
+  // and find/create the ID in the background
+  category_name: string;
+};
+
+export interface Income {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+  income_date: string;
+  sub_total: number;
+  detail?: string | null;
+  crop_id: string;
+  category_id?: string | null;
+  // For display
+  crops?: { name: string };
+  categories?: { name: string };
+  // This will hold the linked expenses after we fetch them
+  expenses?: Expense[];
+}
+
+export type IncomeFormData = {
+  income_date: string;
+  sub_total: number;
+  detail?: string;
+  crop_id: string;
+  category_name: string;
+  // Array of expense IDs to link
+  linked_expense_ids: string[];
+};
+
+export type PlanStatus = 'plan' | 'doing' | 'complete';
+
+export interface FertilizerPlan {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+  crop_id: string;
+  plan_date: string;
+  stage?: string | null;
+  status: PlanStatus;
+  detail?: string | null;
+  fertilizer_type?: string | null;
+  amount_kg?: number | null;
+  // For display
+  crops?: { name: string };
+  // For linking
+  expenses?: Expense[];
+}
+
+export type FertilizerPlanFormData = {
+  crop_id: string;
+  plan_date: string;
+  stage?: string;
+  status: PlanStatus;
+  detail?: string;
+  fertilizer_type?: string;
+  amount_kg?: number;
+  linked_expense_ids: string[];
+};
