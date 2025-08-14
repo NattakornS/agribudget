@@ -2,10 +2,14 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabaseClient';
 
+import { AuthResponse, SignUpWithPasswordCredentials } from '@supabase/supabase-js';
+
 interface AuthContextType {
   session: Session | null;
   user: User | null;
   signOut: () => void;
+  signUp: (credentials: SignUpWithPasswordCredentials) => Promise<AuthResponse>;
+  signInWithPassword: (credentials: SignUpWithPasswordCredentials) => Promise<AuthResponse>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -37,6 +41,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     session,
     user,
     signOut: () => supabase.auth.signOut(),
+    signUp: (credentials: SignUpWithPasswordCredentials) =>
+      supabase.auth.signUp(credentials),
+    signInWithPassword: (credentials: SignUpWithPasswordCredentials) =>
+      supabase.auth.signInWithPassword(credentials),
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
