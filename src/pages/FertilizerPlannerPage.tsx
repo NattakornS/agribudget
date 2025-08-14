@@ -159,6 +159,20 @@ const FertilizerPlannerPage = () => {
                 <strong>{plan.plan_date}: {plan.crops?.name}</strong>
                 <p>{plan.fertilizer_type} - {plan.amount_kg} kg</p>
                 <p>{plan.detail}</p>
+
+                {(plan as any).fertilize_planner_expenses?.length > 0 && (
+                  <div style={{ marginTop: '8px', borderTop: '1px solid #eee', paddingTop: '4px' }}>
+                    <p style={{fontSize: '0.8em', fontWeight: 'bold'}}>Linked Expenses:</p>
+                    <ul style={{fontSize: '0.8em', paddingLeft: '16px', margin: 0}}>
+                      {(plan as any).fertilize_planner_expenses.map((fpe: any) => (
+                        <li key={fpe.expenses.id}>
+                          {fpe.expenses.detail} - ${fpe.expenses.amount}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
                 <select value={plan.status} onChange={(e) => handleStatusChange(plan.id, e.target.value as PlanStatus)}>
                     {statusColumns.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>

@@ -76,8 +76,13 @@ const IncomePage = () => {
     }
   };
 
-  const calculateTotal = (income: Income) => {
-    const linkedExpensesTotal = income.expenses?.reduce((sum, exp) => sum + exp.amount, 0) ?? 0;
+  const getLinkedExpenses = (income: any) => {
+    return income.income_expenses?.map((ie: any) => ie.expenses) ?? [];
+  }
+
+  const calculateTotal = (income: any) => {
+    const linkedExpenses = getLinkedExpenses(income);
+    const linkedExpensesTotal = linkedExpenses.reduce((sum: number, exp: any) => sum + exp.amount, 0);
     return income.sub_total - linkedExpensesTotal;
   };
 
@@ -136,24 +141,27 @@ const IncomePage = () => {
 
       <h2>Income Records</h2>
       <ul>
-        {incomeList.map((income) => (
-          <li key={income.id}>
-            <strong>{income.income_date}</strong>: {income.crops?.name} - <strong>Sub-total: ${income.sub_total}</strong> ({income.categories?.name})
-            <p>{income.detail}</p>
-            {income.expenses && income.expenses.length > 0 && (
-              <div>
-                <h4>Linked Expenses:</h4>
-                <ul>
-                  {income.expenses.map(exp => (
-                    <li key={exp.id}>{exp.expense_date}: {exp.detail} - ${exp.amount}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            <h3>Net Total: ${calculateTotal(income).toFixed(2)}</h3>
-            <button onClick={() => handleDeleteIncome(income.id)}>Delete</button>
-          </li>
-        ))}
+        {incomeList.map((income) => {
+          const linkedExpenses = getLinkedExpenses(income);
+          return (
+            <li key={income.id}>
+              <strong>{income.income_date}</strong>: {income.crops?.name} - <strong>Sub-total: ${income.sub_total}</strong> ({income.categories?.name})
+              <p>{income.detail}</p>
+              {linkedExpenses.length > 0 && (
+                <div>
+                  <h4>Linked Expenses:</h4>
+                  <ul>
+                    {linkedExpenses.map((exp: any) => (
+                      <li key={exp.id}>{exp.expense_date}: {exp.detail} - ${exp.amount}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <h3>Net Total: ${calculateTotal(income).toFixed(2)}</h3>
+              <button onClick={() => handleDeleteIncome(income.id)}>Delete</button>
+            </li>
+          )
+        })}
       </ul>
     </div>
   );

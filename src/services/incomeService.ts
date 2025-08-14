@@ -18,7 +18,7 @@ export const getIncome = async () => {
       detail,
       crops ( name ),
       categories ( name ),
-      expenses ( id, expense_date, amount, detail, categories (name) )
+      income_expenses ( expenses ( id, expense_date, amount, detail, categories (name) ) )
     `)
     .eq('user_id', sessionData.session.user.id)
     .order('income_date', { ascending: false });

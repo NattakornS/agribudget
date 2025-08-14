@@ -13,7 +13,7 @@ export const getFertilizerPlans = async () => {
     .select(`
       *,
       crops ( name ),
-      expenses ( id, expense_date, amount, detail )
+      fertilize_planner_expenses ( expenses ( id, expense_date, amount, detail ) )
     `)
     .eq('user_id', sessionData.session.user.id)
     .order('plan_date', { ascending: true });
