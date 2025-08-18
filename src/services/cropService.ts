@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabaseClient';
-import { CropFormData } from '@/types';
+import type { CropFormData } from '@/types';
 
 const TABLE_NAME = 'crops';
 

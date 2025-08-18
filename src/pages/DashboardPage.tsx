@@ -12,6 +12,10 @@ import {
 import { getIncome } from '@/services/incomeService';
 import { getExpenses } from '@/services/expenseService';
 import { Income, Expense } from '@/types';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { TrendingUp, TrendingDown, DollarSign, AlertCircle } from 'lucide-react';
 
 ChartJS.register(
   CategoryScale,
@@ -72,20 +76,17 @@ const processChartData = (income: Income[], expenses: Expense[]) => {
 
 
 const DashboardPage = () => {
-  const [chartData, setChartData] = useState<any>(null);
+  const [income, setIncome] = useState<Income[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
-        const [incomeData, expensesData] = await Promise.all([
-          getIncome(),
-          getExpenses(),
-        ]);
-        const processedData = processChartData(incomeData as Income[], expensesData as Expense[]);
-        setChartData(processedData);
+        const [incomeData, expensesData] = await Promise.all([getIncome(), getExpenses()]);
+        setIncome(incomeData as Income[]);
+        setExpenses(expensesData as Expense[]);
         setError(null);
       } catch (err: any) {
         setError(err.message);
@@ -96,25 +97,143 @@ const DashboardPage = () => {
     fetchData();
   }, []);
 
-  if (loading) return <div>Loading Dashboard...</div>;
-  if (error) return <div style={{ color: 'red' }}>Error loading data: {error}</div>;
+  const chartData = processChartData(income, expenses);
+  const totalIncome = income.reduce((acc, curr) => acc + curr.sub_total, 0);
+  const totalExpenses = expenses.reduce((acc, curr) => acc + curr.amount, 0);
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <Skeleton className="h-4 w-24 mb-2" />
+                <Skeleton className="h-8 w-32" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <Card>
+          <CardContent className="p-6">
+            <Skeleton className="h-4 w-48 mb-4" />
+            <Skeleton className="h-[400px] w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
-    <div>
-      <h1>Dashboard</h1>
-      <h2>Yearly Profit by Crop</h2>
-      {chartData && (
-        <Bar
-          options={{
-            responsive: true,
-            plugins: {
-              legend: { position: 'top' as const },
-              title: { display: true, text: 'Profit (Income - Expenses)' },
-            },
-          }}
-          data={chartData}
-        />
-      )}
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground">
+          Overview of your farm's financial performance
+        </p>
+      </div>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Income</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">
+              ${totalIncome.toFixed(2)}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              From {income.length} transactions
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
+            <TrendingDown className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">
+              ${totalExpenses.toFixed(2)}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              From {expenses.length} transactions
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Net Profit</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${
+              totalIncome - totalExpenses >= 0 
+                ? 'text-green-600' 
+                : 'text-red-600'
+            }`}>
+              ${(totalIncome - totalExpenses).toFixed(2)}
+            </div>
+            <p className={`text-xs ${
+              totalIncome - totalExpenses >= 0 
+                ? 'text-green-600' 
+                : 'text-red-600'
+            }`}>
+              {totalIncome - totalExpenses >= 0 ? 'Profitable' : 'Loss'}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Profit by Crop and Year</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="w-full h-[400px]">
+            <Bar
+              data={chartData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    ticks: {
+                      callback: (value) => `$${value}`
+                    }
+                  }
+                },
+                plugins: {
+                  legend: {
+                    position: 'bottom'
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: (context) => `$${context.parsed.y.toFixed(2)}`
+                    }
+                  }
+                }
+              }}
+            />
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

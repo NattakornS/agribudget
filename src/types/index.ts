@@ -4,7 +4,9 @@ export interface Crop {
   updated_at: string;
   user_id: string;
   name: string;
-  location?: string | null;
+  location?: string | null; // Keep backward compatibility for text location
+  latitude?: number | null;
+  longitude?: number | null;
   area?: number | null;
   amount?: number | null;
   started_date?: string | null;
@@ -27,6 +29,9 @@ export interface Expense {
   user_id: string;
   expense_date: string;
   amount: number;
+  total: number;
+  cost: number;
+  unit?: string | null;
   detail?: string | null;
   crop_id: string;
   category_id?: string | null;
@@ -37,7 +42,10 @@ export interface Expense {
 
 export type ExpenseFormData = {
   expense_date: string;
+  cost: number;
+  unit?: string;
   amount: number;
+  total: number;
   detail?: string;
   crop_id: string;
   // For the form, we'll handle category as a string
@@ -52,6 +60,10 @@ export interface Income {
   user_id: string;
   income_date: string;
   sub_total: number;
+  total: number;
+  amount: number;
+  price: number;
+  unit?: string | null;
   detail?: string | null;
   crop_id: string;
   category_id?: string | null;
@@ -64,7 +76,11 @@ export interface Income {
 
 export type IncomeFormData = {
   income_date: string;
+  price: number;
+  unit?: string;
+  amount: number;
   sub_total: number;
+  total: number;
   detail?: string;
   crop_id: string;
   category_name: string;
