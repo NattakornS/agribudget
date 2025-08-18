@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "leaflet/dist/leaflet.css";
 
 @custom-variant dark (&:is(.dark *));
 :root {
@@ -182,4 +183,59 @@ button:focus-visible {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Fix for Leaflet map z-index issues in modals */
+.leaflet-container {
+  z-index: 1;
+}
+
+/* Modal map gets higher z-index */
+.modal-map {
+  z-index: 1050;
+  position: relative;
+}
+
+.modal-map .leaflet-container {
+  z-index: 1050 !important;
+}
+
+.modal-map .leaflet-control-container {
+  z-index: 1051 !important;
+}
+
+.modal-map .leaflet-popup-pane {
+  z-index: 1052 !important;
+}
+
+.modal-map .leaflet-tooltip-pane {
+  z-index: 1053 !important;
+}
+
+.modal-map .leaflet-marker-pane {
+  z-index: 1054 !important;
+}
+
+.modal-map .leaflet-shadow-pane {
+  z-index: 1055 !important;
+}
+
+/* Force all Leaflet layers in modal to have high z-index */
+.modal-map .leaflet-pane {
+  z-index: 1056 !important;
+}
+
+/* Ensure modal dialog has proper z-index hierarchy */
+[data-radix-dialog-overlay] {
+  z-index: 50;
+}
+
+[data-radix-dialog-content] {
+  z-index: 51;
+}
+
+/* Ensure modal content container has proper z-index */
+[data-radix-dialog-content] .modal-map {
+  z-index: 1060 !important;
+  position: relative;
 }
