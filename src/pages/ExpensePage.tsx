@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Crop, Expense, ExpenseFormData } from '@/types';
+import type { Crop, Expense, ExpenseFormData } from '@/types';
 import { getCrops } from '@/services/cropService';
 import { getExpenses, createExpense, deleteExpense, updateExpense } from '@/services/expenseService';
 import { useCropFilter } from '@/contexts/CropFilterContext';
@@ -10,7 +10,7 @@ import FloatingActionButton from '@/components/FloatingActionButton';
 import RecordList from '@/components/RecordList';
 import EditModal from '@/components/EditModal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -62,7 +62,7 @@ const ExpensePage = () => {
   // Watch cost and amount for automatic calculation
   const watchedCost = watch('cost');
   const watchedAmount = watch('amount');
-  const watchedTotal = watch('total');
+
 
   // Filter expenses list based on selected crop
   const filteredExpenses = useMemo(() => {
@@ -166,13 +166,13 @@ const ExpensePage = () => {
     setIsModalOpen(true);
   };
   
-  const handleDeleteWrapper = async () => {
-    try {
-      await handleDeleteExpense();
-    } catch (error) {
-      // Error is already handled in handleDeleteExpense
-    }
-  };
+  // const handleDeleteWrapper = async () => {
+  //   try {
+  //     await handleDeleteExpense();
+  //   } catch (error) {
+  //     // Error is already handled in handleDeleteExpense
+  //   }
+  // };
 
   const renderExpenseItem = (expense: Expense) => (
     <div className="flex justify-between items-start">

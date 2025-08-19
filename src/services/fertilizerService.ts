@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabaseClient';
-import { FertilizerPlanFormData, PlanStatus } from '@/types';
+import type { FertilizerPlanFormData, PlanStatus } from '@/types';
 
 const PLANNER_TABLE = 'fertilize_planner';
 const JOIN_TABLE = 'fertilize_planner_expenses';

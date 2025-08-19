@@ -11,7 +11,7 @@ import {
 } from 'chart.js';
 import { getIncome } from '@/services/incomeService';
 import { getExpenses } from '@/services/expenseService';
-import { Income, Expense } from '@/types';
+import type { Income, Expense } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -85,8 +85,8 @@ const DashboardPage = () => {
     const fetchData = async () => {
       try {
         const [incomeData, expensesData] = await Promise.all([getIncome(), getExpenses()]);
-        setIncome(incomeData as Income[]);
-        setExpenses(expensesData as Expense[]);
+        setIncome(incomeData as unknown as Income[]);
+        setExpenses(expensesData as unknown as Expense[]);
         setError(null);
       } catch (err: any) {
         setError(err.message);

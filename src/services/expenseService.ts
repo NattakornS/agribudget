@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabaseClient';
-import { ExpenseFormData } from '@/types';
+import type { ExpenseFormData } from '@/types';
 import { findOrCreateCategory } from './categoryService';
 
 const TABLE_NAME = 'expenses';
