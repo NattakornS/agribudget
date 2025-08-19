@@ -7,6 +7,7 @@ import { getCrops } from '@/services/cropService';
 import { getExpenses } from '@/services/expenseService';
 import { getIncome, createIncome, updateIncome, deleteIncome } from '@/services/incomeService';
 import { useCropFilter } from '@/contexts/CropFilterContext';
+import { useYearFilter } from '@/contexts/YearFilterContext';
 import FloatingActionButton from '@/components/FloatingActionButton';
 import RecordList from '@/components/RecordList';
 import EditModal from '@/components/EditModal';
@@ -43,8 +44,9 @@ const IncomePage = () => {
   const [selectedIncome, setSelectedIncome] = useState<Income | null>(null);
   const [selectedExpenseIds, setSelectedExpenseIds] = useState<string[]>([]);
   
-  // Get crop filter from context
+  // Get filters from context
   const { selectedCropId } = useCropFilter();
+  const { selectedYear, isAllYears } = useYearFilter();
 
   const defaultValues: IncomeFormData = {
     income_date: new Date().toISOString().split('T')[0],
@@ -79,13 +81,15 @@ const IncomePage = () => {
   // Calculate net total (sub_total - selected expenses total)
   const netTotal = watchedSubTotal - selectedExpensesTotal;
 
-  // Filter income list based on selected crop
+  // Filter income list based on selected crop and year
   const filteredIncomeList = useMemo(() => {
-    if (!selectedCropId) {
-      return incomeList;
-    }
-    return incomeList.filter(income => income.crop_id === selectedCropId);
-  }, [incomeList, selectedCropId]);
+    return incomeList.filter(income => {
+      const incomeYear = new Date(income.income_date).getFullYear();
+      const matchesYear = isAllYears || incomeYear === selectedYear;
+      const matchesCrop = !selectedCropId || income.crop_id === selectedCropId;
+      return matchesYear && matchesCrop;
+    });
+  }, [incomeList, selectedCropId, selectedYear, isAllYears]);
 
   // Auto-calculate sub_total when price or amount changes, unless manually overridden
   useEffect(() => {

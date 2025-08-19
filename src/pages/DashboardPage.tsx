@@ -1,5 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Bar } from 'react-chartjs-2';
+import { useYearFilter } from '@/contexts/YearFilterContext';
+import { useCropFilter } from '@/contexts/CropFilterContext';
+import { ExpenseTreemap } from '@/components/ExpenseTreemap';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -27,7 +30,7 @@ ChartJS.register(
 );
 
 // Function to process data for the chart
-const processChartData = (income: Income[], expenses: Expense[]) => {
+const processChartData = (income: Income[], expenses: Expense[], selectedYear: number) => {
   const profitsByYearAndCrop: { [year: string]: { [cropName: string]: { income: number, expense: number } } } = {};
 
   // Process income
@@ -97,9 +100,42 @@ const DashboardPage = () => {
     fetchData();
   }, []);
 
-  const chartData = processChartData(income, expenses);
-  const totalIncome = income.reduce((acc, curr) => acc + curr.sub_total, 0);
-  const totalExpenses = expenses.reduce((acc, curr) => acc + curr.amount, 0);
+
+  const { selectedYear, isAllYears } = useYearFilter();
+  const { selectedCropId } = useCropFilter();
+
+  // Filter data by year and crop
+  const filteredIncome = useMemo(() => {
+    let filtered = income;
+    
+    if (!isAllYears) {
+      filtered = filtered.filter(inc => new Date(inc.income_date).getFullYear() === selectedYear);
+    }
+    
+    if (selectedCropId) {
+      filtered = filtered.filter(inc => inc.crop_id === selectedCropId);
+    }
+    
+    return filtered;
+  }, [income, selectedYear, isAllYears, selectedCropId]);
+
+  const filteredExpenses = useMemo(() => {
+    let filtered = expenses;
+    
+    if (!isAllYears) {
+      filtered = filtered.filter(exp => new Date(exp.expense_date).getFullYear() === selectedYear);
+    }
+    
+    if (selectedCropId) {
+      filtered = filtered.filter(exp => exp.crop_id === selectedCropId);
+    }
+    
+    return filtered;
+  }, [expenses, selectedYear, isAllYears, selectedCropId]);
+
+  const chartData = processChartData(filteredIncome, filteredExpenses, selectedYear);
+  const totalIncome = filteredIncome.reduce((acc, curr) => acc + curr.sub_total, 0);
+  const totalExpenses = filteredExpenses.reduce((acc, curr) => acc + curr.amount, 0);
 
   if (loading) {
     return (
@@ -199,19 +235,21 @@ const DashboardPage = () => {
         </Card>
       </div>
 
-      {/* Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Profit by Crop and Year</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="w-full h-[400px]">
-            <Bar
-              data={chartData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Profit Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Profit by Crop and Year</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="w-full h-[400px]">
+              <Bar
+                data={chartData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  scales: {
                   y: {
                     beginAtZero: true,
                     ticks: {
@@ -234,6 +272,17 @@ const DashboardPage = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Expense Treemap */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Expenses by Category</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ExpenseTreemap expenses={filteredExpenses} />
+        </CardContent>
+      </Card>
+    </div>
     </div>
   );
 };

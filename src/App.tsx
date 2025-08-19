@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { CropFilterProvider } from './contexts/CropFilterContext';
+import { YearFilterProvider } from './contexts/YearFilterContext';
 
 import DashboardPage from './pages/DashboardPage';
 import IncomePage from './pages/IncomePage';
@@ -21,7 +22,9 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={
               <CropFilterProvider>
-                <Layout />
+                <YearFilterProvider>
+                  <Layout />
+                </YearFilterProvider>
               </CropFilterProvider>
             }>
               <Route path="/" element={<DashboardPage />} />

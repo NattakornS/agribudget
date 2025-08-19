@@ -46,7 +46,7 @@ const CropFilter = () => {
         )}
       </div>
       {selectedCrop && (
-        <div className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+        <div className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 rounded">
           Showing: <span className="font-medium">{selectedCrop.name}</span>
         </div>
       )}

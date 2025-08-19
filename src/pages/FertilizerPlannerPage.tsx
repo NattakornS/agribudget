@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
+import { useYearFilter } from '@/contexts/YearFilterContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import type { Crop, Expense, FertilizerPlan, FertilizerPlanFormData, PlanStatus } from '@/types';
 import { getCrops } from '@/services/cropService';
 import { getExpenses } from '@/services/expenseService';
-import { getFertilizerPlans, createFertilizerPlan, deleteFertilizerPlan, updatePlanStatus } from '@/services/fertilizerService';
+import { getFertilizerPlans, createFertilizerPlan, deleteFertilizerPlan, updatePlanStatus, updateFertilizerPlan } from '@/services/fertilizerService';
 import FloatingActionButton from '@/components/FloatingActionButton';
 import RecordList from '@/components/RecordList';
 import EditModal from '@/components/EditModal';
@@ -41,6 +42,8 @@ const FertilizerPlannerPage = () => {
   const [selectedPlan, setSelectedPlan] = useState<FertilizerPlan | null>(null);
   const [selectedExpenseIds, setSelectedExpenseIds] = useState<string[]>([]);
 
+  const { selectedYear, isAllYears } = useYearFilter();
+
   const defaultValues = {
     plan_date: new Date().toISOString().split('T')[0],
     status: 'plan' as PlanStatus,
@@ -52,11 +55,20 @@ const FertilizerPlannerPage = () => {
     linked_expense_ids: []
   };
 
-  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<FertilizerPlanFormData>({
+  const { register, handleSubmit, reset, setValue,watch, formState: { errors } } = useForm<FertilizerPlanFormData>({
     // @ts-ignore - Skip type checking for resolver
     resolver: zodResolver(planSchema),
     defaultValues
   });
+
+  // Filter plans based on year
+  const filteredPlans = useMemo(() => {
+    if (isAllYears) return plans;
+    return plans.filter(plan => {
+      const planYear = new Date(plan.plan_date).getFullYear();
+      return planYear === selectedYear;
+    });
+  }, [plans, selectedYear, isAllYears]);
 
   const refreshPlans = async () => {
     try {
@@ -94,6 +106,24 @@ const FertilizerPlannerPage = () => {
     };
     fetchData();
   }, []);
+
+  const handleUpdatePlan = async (data: FertilizerPlanFormData) => {
+    if (!selectedPlan) return;
+    try {
+      const formDataWithExpenses = {
+        ...data,
+        linked_expense_ids: selectedExpenseIds,
+      };
+      await updateFertilizerPlan(selectedPlan.id, formDataWithExpenses);
+      await refreshPlans();
+      setIsModalOpen(false);
+      setSelectedPlan(null);
+      setSelectedExpenseIds([]);
+      reset(defaultValues);
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
 
   const handleAddPlan = async (data: FertilizerPlanFormData) => {
     try {
@@ -376,7 +406,7 @@ const FertilizerPlannerPage = () => {
 
       {/* Plans List */}
       <RecordList
-        records={plans}
+        records={filteredPlans}
         onRecordClick={handleOpenModal}
         renderItem={renderPlanItem}
       />
@@ -392,6 +422,9 @@ const FertilizerPlannerPage = () => {
           reset(defaultValues);
         }}
         onSave={handleSubmit((data: any) => {
+          if (selectedPlan) {
+            return handleUpdatePlan(data as FertilizerPlanFormData);
+          }
           return handleAddPlan(data as FertilizerPlanFormData);
         })}
         onDelete={selectedPlan ? () => {
@@ -402,7 +435,7 @@ const FertilizerPlannerPage = () => {
         <div className="space-y-4">
           <div>
             <label className="text-sm font-medium">Crop *</label>
-            <Select onValueChange={(value) => setValue('crop_id', value)}>
+            <Select value={watch('crop_id')} onValueChange={(value) => setValue('crop_id', value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a crop" />
               </SelectTrigger>
@@ -432,7 +465,7 @@ const FertilizerPlannerPage = () => {
 
           <div>
             <label className="text-sm font-medium">Status *</label>
-            <Select onValueChange={(value) => setValue('status', value as PlanStatus)}>
+            <Select value={watch('status')} onValueChange={(value) => setValue('status', value as PlanStatus)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>

@@ -6,6 +6,7 @@ import type { Crop, Expense, ExpenseFormData } from '@/types';
 import { getCrops } from '@/services/cropService';
 import { getExpenses, createExpense, deleteExpense, updateExpense } from '@/services/expenseService';
 import { useCropFilter } from '@/contexts/CropFilterContext';
+import { useYearFilter } from '@/contexts/YearFilterContext';
 import FloatingActionButton from '@/components/FloatingActionButton';
 import RecordList from '@/components/RecordList';
 import EditModal from '@/components/EditModal';
@@ -38,8 +39,9 @@ const ExpensePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   
-  // Get crop filter from context
+  // Get filters from context
   const { selectedCropId } = useCropFilter();
+  const { selectedYear, isAllYears } = useYearFilter();
 
   const defaultValues: ExpenseFormData = {
     expense_date: new Date().toISOString().split('T')[0],
@@ -64,13 +66,15 @@ const ExpensePage = () => {
   const watchedAmount = watch('amount');
 
 
-  // Filter expenses list based on selected crop
+  // Filter expenses list based on selected crop and year
   const filteredExpenses = useMemo(() => {
-    if (!selectedCropId) {
-      return expenses;
-    }
-    return expenses.filter(expense => expense.crop_id === selectedCropId);
-  }, [expenses, selectedCropId]);
+    return expenses.filter(expense => {
+      const expenseYear = new Date(expense.expense_date).getFullYear();
+      const matchesYear = isAllYears || expenseYear === selectedYear;
+      const matchesCrop = !selectedCropId || expense.crop_id === selectedCropId;
+      return matchesYear && matchesCrop;
+    });
+  }, [expenses, selectedCropId, selectedYear, isAllYears]);
 
   // Auto-calculate total when cost or amount changes, unless manually overridden
   useEffect(() => {
@@ -196,7 +200,7 @@ const ExpensePage = () => {
       <div className="text-right">
         <div className="flex items-center gap-1 text-lg font-semibold text-red-600">
           <DollarSign className="h-4 w-4" />
-          {expense.total.toFixed(2)}
+          {expense.total?.toFixed(2)}
         </div>
       </div>
     </div>
