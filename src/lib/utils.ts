@@ -4,3 +4,37 @@ import { twMerge } from "tailwind-merge"
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
+
+interface ColorPalette {
+  base: string;
+  border: string;
+}
+
+export function generateColors(count: number): ColorPalette[] {
+  // Define a base set of colors for financial data visualization
+  const baseColors: ColorPalette[] = [
+    { base: 'rgba(54, 162, 235, 0.6)', border: 'rgba(54, 162, 235, 1)' },   // Blue
+    { base: 'rgba(75, 192, 192, 0.6)', border: 'rgba(75, 192, 192, 1)' },   // Teal
+    { base: 'rgba(255, 159, 64, 0.6)', border: 'rgba(255, 159, 64, 1)' },   // Orange
+    { base: 'rgba(153, 102, 255, 0.6)', border: 'rgba(153, 102, 255, 1)' }, // Purple
+    { base: 'rgba(255, 99, 132, 0.6)', border: 'rgba(255, 99, 132, 1)' },   // Red
+    { base: 'rgba(255, 205, 86, 0.6)', border: 'rgba(255, 205, 86, 1)' },   // Yellow
+    { base: 'rgba(201, 203, 207, 0.6)', border: 'rgba(201, 203, 207, 1)' }, // Grey
+    { base: 'rgba(100, 181, 246, 0.6)', border: 'rgba(100, 181, 246, 1)' }, // Light Blue
+  ];
+
+  // If we need more colors than our base set, generate them
+  if (count > baseColors.length) {
+    const additionalColors: ColorPalette[] = [];
+    for (let i = baseColors.length; i < count; i++) {
+      const hue = (i * 137.5) % 360; // Use golden angle approximation for even distribution
+      additionalColors.push({
+        base: `hsla(${hue}, 70%, 65%, 0.6)`,
+        border: `hsla(${hue}, 70%, 65%, 1)`,
+      });
+    }
+    return [...baseColors, ...additionalColors];
+  }
+
+  return baseColors.slice(0, count);
+}

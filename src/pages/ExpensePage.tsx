@@ -18,7 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, DollarSign, AlertCircle } from 'lucide-react';
+import { Calendar, AlertCircle } from 'lucide-react';
 
 const expenseSchema = z.object({
   crop_id: z.string().min(1, 'Please select a crop'),
@@ -199,8 +199,7 @@ const ExpensePage = () => {
       </div>
       <div className="text-right">
         <div className="flex items-center gap-1 text-lg font-semibold text-red-600">
-          <DollarSign className="h-4 w-4" />
-          {expense.total?.toFixed(2)}
+          ฿{expense.total?.toFixed(2)}
         </div>
       </div>
     </div>
@@ -258,12 +257,12 @@ const ExpensePage = () => {
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5 text-red-600" />
+            <div className="h-5 w-5 text-red-600">฿</div>
             <span className="text-sm text-muted-foreground">
               {selectedCropId ? 'Filtered Expenses:' : 'Total Expenses:'}
             </span>
             <span className="text-lg font-semibold text-red-600">
-              ${filteredExpenses.reduce((sum, expense) => sum + expense.total, 0).toFixed(2)}
+              ฿{filteredExpenses.reduce((sum, expense) => sum + expense.total, 0).toFixed(2)}
             </span>
             <span className="text-sm text-muted-foreground">
               ({filteredExpenses.length} records

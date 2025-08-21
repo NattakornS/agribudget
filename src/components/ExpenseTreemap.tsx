@@ -33,25 +33,25 @@ export const ExpenseTreemap = ({ expenses }: ExpenseTreemapProps) => {
       acc[categoryName] += expense.amount;
       return acc;
     }, {} as Record<string, number>);
-
+    
     // Convert to format required by treemap
     const data = Object.entries(groupedExpenses).map(([category, value]) => ({
-      category,
-      value,
+      g: category, // g is required by treemap for grouping
+      v: value,    // v is required by treemap for value
     }));
 
     return {
       datasets: [
         {
-          data: data,
           tree: data,
-          key: 'value',
-          groups: ['category'],
+          key: 'v',
+          groups: ['g'],
           spacing: 1,
+          data: data, // Required by Chart.js
           backgroundColor: (ctx: any) => {
             if (!ctx.type) return 'transparent';
             const value = ctx.raw?.v;
-            const maxValue = Math.max(...data.map(d => d.value));
+            const maxValue = Math.max(...data.map(d => d.v));
             const intensity = Math.round((value / maxValue) * 155) + 100;
             return `hsl(210, 70%, ${intensity}%)`;
           },

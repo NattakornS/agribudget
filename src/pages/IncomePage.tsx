@@ -19,7 +19,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
+import { Calendar, TrendingUp, AlertCircle } from 'lucide-react';
 
 const incomeSchema = z.object({
   crop_id: z.string().min(1, 'Please select a crop'),
@@ -79,7 +79,7 @@ const IncomePage = () => {
     .reduce((sum, expense) => sum + expense.total, 0);
 
   // Calculate net total (sub_total - selected expenses total)
-  const netTotal = watchedSubTotal - selectedExpensesTotal;
+  const total = watchedSubTotal - selectedExpensesTotal;
 
   // Filter income list based on selected crop and year
   const filteredIncomeList = useMemo(() => {
@@ -254,12 +254,11 @@ const IncomePage = () => {
         </div>
         <div className="text-right">
           <div className="flex items-center gap-1 text-lg font-semibold text-green-600 mb-1">
-            <DollarSign className="h-4 w-4" />
-            {income.sub_total.toFixed(2)}
+            ฿{income.sub_total.toFixed(2)}
           </div>
           {linkedExpenses.length > 0 && (
             <div className="text-sm text-muted-foreground">
-              Net: ${netIncome.toFixed(2)}
+              Net: ฿{netIncome.toFixed(2)}
             </div>
           )}
         </div>
@@ -324,7 +323,7 @@ const IncomePage = () => {
               {selectedCropId ? 'Filtered Income:' : 'Total Income:'}
             </span>
             <span className="text-lg font-semibold text-green-600">
-              ${filteredIncomeList.reduce((sum, income) => sum + income.sub_total, 0).toFixed(2)}
+              ฿{filteredIncomeList.reduce((sum, income) => sum + income.sub_total, 0).toFixed(2)}
             </span>
             <span className="text-sm text-muted-foreground">
               ({filteredIncomeList.length} records
@@ -353,11 +352,11 @@ const IncomePage = () => {
           setIsManualSubTotal(false);
           reset(defaultValues);
         }}
-        onSave={handleSubmit((data: any) => {
+        onSave={handleSubmit((data: IncomeFormData) => {
           if (selectedIncome) {
-            return handleUpdateIncome(data as IncomeFormData);
+            return handleUpdateIncome(data);
           }
-          return handleAddIncome(data as IncomeFormData);
+          return handleAddIncome(data);
         })}
         onDelete={selectedIncome ? () => {
           void handleDeleteIncome();
@@ -474,8 +473,8 @@ const IncomePage = () => {
                 )}
                 <div className="flex justify-between font-semibold text-base border-t pt-2">
                   <span>Net Total:</span>
-                  <span className={netTotal >= 0 ? 'text-green-600' : 'text-red-600'}>
-                    ${netTotal.toFixed(2)}
+                  <span className={total >= 0 ? 'text-green-600' : 'text-red-600'}>
+                    ${total.toFixed(2)}
                   </span>
                 </div>
               </div>

@@ -2,7 +2,8 @@ import { useEffect, useState, useMemo } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { useYearFilter } from '@/contexts/YearFilterContext';
 import { useCropFilter } from '@/contexts/CropFilterContext';
-import { ExpenseTreemap } from '@/components/ExpenseTreemap';
+import { ExpensePieChart } from '@/components/ExpensePieChart';
+import { FertilizerUsageTable } from '@/components/FertilizerUsageTable';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -14,11 +15,13 @@ import {
 } from 'chart.js';
 import { getIncome } from '@/services/incomeService';
 import { getExpenses } from '@/services/expenseService';
-import type { Income, Expense } from '@/types';
+import { getCrops } from '@/services/cropService';
+import type { Income, Expense, Crop, FertilizerPlan } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { TrendingUp, TrendingDown, DollarSign, AlertCircle } from 'lucide-react';
+import { TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
+import { getFertilizerPlans } from '@/services/fertilizerService';
 
 ChartJS.register(
   CategoryScale,
@@ -30,7 +33,8 @@ ChartJS.register(
 );
 
 // Function to process data for the chart
-const processChartData = (income: Income[], expenses: Expense[], selectedYear: number) => {
+const processChartData = (income: Income[], expenses: Expense[]) => {
+  
   const profitsByYearAndCrop: { [year: string]: { [cropName: string]: { income: number, expense: number } } } = {};
 
   // Process income
@@ -81,15 +85,24 @@ const processChartData = (income: Income[], expenses: Expense[], selectedYear: n
 const DashboardPage = () => {
   const [income, setIncome] = useState<Income[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [crops, setCrops] = useState<Crop[]>([]);
+  const [fertilizerPlan, setfertilizerPlan] = useState<FertilizerPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [incomeData, expensesData] = await Promise.all([getIncome(), getExpenses()]);
+        const [incomeData, expensesData, cropsData,fertilizerPlanData] = await Promise.all([
+          getIncome(),
+          getExpenses(),
+          getCrops(),
+          getFertilizerPlans()
+        ]);
         setIncome(incomeData as unknown as Income[]);
         setExpenses(expensesData as unknown as Expense[]);
+        setCrops(cropsData as unknown as Crop[]);
+        setfertilizerPlan(fertilizerPlanData as unknown as FertilizerPlan[]);
         setError(null);
       } catch (err: any) {
         setError(err.message);
@@ -133,7 +146,7 @@ const DashboardPage = () => {
     return filtered;
   }, [expenses, selectedYear, isAllYears, selectedCropId]);
 
-  const chartData = processChartData(filteredIncome, filteredExpenses, selectedYear);
+  const chartData = processChartData(filteredIncome, filteredExpenses);
   const totalIncome = filteredIncome.reduce((acc, curr) => acc + curr.sub_total, 0);
   const totalExpenses = filteredExpenses.reduce((acc, curr) => acc + curr.amount, 0);
 
@@ -188,7 +201,7 @@ const DashboardPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              ${totalIncome.toFixed(2)}
+              ฿{totalIncome.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
               From {income.length} transactions
@@ -203,7 +216,7 @@ const DashboardPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              ${totalExpenses.toFixed(2)}
+              ฿{totalExpenses.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
               From {expenses.length} transactions
@@ -214,7 +227,7 @@ const DashboardPage = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Net Profit</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <div className="h-4 w-4 text-muted-foreground">฿</div>
           </CardHeader>
           <CardContent>
             <div className={`text-2xl font-bold ${
@@ -222,7 +235,7 @@ const DashboardPage = () => {
                 ? 'text-green-600' 
                 : 'text-red-600'
             }`}>
-              ${(totalIncome - totalExpenses).toFixed(2)}
+              ฿{(totalIncome - totalExpenses).toFixed(2)}
             </div>
             <p className={`text-xs ${
               totalIncome - totalExpenses >= 0 
@@ -279,12 +292,21 @@ const DashboardPage = () => {
           <CardTitle>Expenses by Category</CardTitle>
         </CardHeader>
         <CardContent>
-          <ExpenseTreemap expenses={filteredExpenses} />
+          <ExpensePieChart expenses={filteredExpenses} />
+        </CardContent>
+        </Card>
+      </div>
+
+      {/* Fertilizer Usage Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Fertilizer Usage per Tree</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <FertilizerUsageTable fertilizerPlans={fertilizerPlan} crops={crops} />
         </CardContent>
       </Card>
-    </div>
+      <div className='p-5'></div>
     </div>
   );
-};
-
-export default DashboardPage;
+};export default DashboardPage;

@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Search, Plus, Calendar, DollarSign } from "lucide-react";
+import { Search, Plus, Calendar, ListChecks, ListTodo } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -142,7 +142,7 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
             onClick={handleSelectAll}
             disabled={filteredAndSortedExpenses.length === 0}
           >
-            Select All
+            <ListChecks />
           </Button>
           <Button
             type="button"
@@ -151,13 +151,12 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
             onClick={handleClearAll}
             disabled={selectedExpenseIds.length === 0}
           >
-            Clear All
+            <ListTodo />
           </Button>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button type="button" variant="outline" size="sm">
                 <Plus className="h-4 w-4 mr-1" />
-                Add New
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
@@ -354,8 +353,7 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
                               )}
                             </div>
                             <div className="flex items-center gap-1 text-sm font-medium ml-2">
-                              <DollarSign className="h-3 w-3" />
-                              {expense.total.toFixed(2)}
+                              ฿{expense.total?.toFixed(2)}
                             </div>
                           </div>
                         </label>

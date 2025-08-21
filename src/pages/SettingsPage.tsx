@@ -398,6 +398,7 @@ const SettingsPage = () => {
           </div>
         </div>
       </EditModal>
+      <div className='p-5'></div>
     </div>
   );
 };
