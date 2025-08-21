@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Tractor, DollarSign, Sprout, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Tractor, DollarSign, Sprout, Settings, LogOut, PersonStanding } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Sidebar,
@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 
 const navItems = [
+  { to: '/profile', name: 'Profile', icon: PersonStanding },
   { to: '/', name: 'Dashboard', icon: LayoutDashboard },
   { to: '/income', name: 'Income', icon: DollarSign },
   { to: '/expenses', name: 'Expenses', icon: Tractor },

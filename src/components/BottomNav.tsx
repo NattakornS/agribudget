@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Tractor, DollarSign, Sprout, Settings } from 'lucide-react';
+import { LayoutDashboard, Tractor, DollarSign, Sprout, PersonStanding } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
@@ -7,7 +7,8 @@ const navItems = [
   { to: '/income', name: 'Income', icon: DollarSign },
   { to: '/expenses', name: 'Expenses', icon: Tractor },
   { to: '/planner', name: 'Planner', icon: Sprout },
-  { to: '/settings', name: 'Settings', icon: Settings },
+//   { to: '/settings', name: 'Settings', icon: Settings },
+  { to: '/profile', name: 'Profile', icon: PersonStanding },
 ];
 
 const BottomNav = () => {

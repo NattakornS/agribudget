@@ -1,28 +1,30 @@
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  User, 
-  Mail, 
-  Calendar, 
-  Shield, 
-  Edit, 
-  Save, 
-  X, 
-  AlertCircle, 
-  CheckCircle,
-  Settings
-} from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  AlertCircle,
+  Calendar,
+  CheckCircle,
+  Edit,
+  Mail,
+  Save,
+  Settings,
+  Shield,
+  User,
+  X
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import { z } from 'zod';
+
 
 interface UserProfile {
   id: string;
@@ -55,7 +57,7 @@ const ProfilePage = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-
+  const navigate = useNavigate();
   const { register, handleSubmit, reset, formState: { errors } } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
   });
@@ -190,11 +192,17 @@ const ProfilePage = () => {
   return (
     <div className="space-y-6 pb-20">
       {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Profile</h1>
-        <p className="text-muted-foreground">
-          Manage your account information and preferences
-        </p>
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight">Profile</h1>
+          <p className="text-muted-foreground">
+            Manage your account information and preferences
+          </p>
+        </div>
+        {/* <SettingsMenu /> */}
+        <Button variant={'outline'} onClick={()=>navigate('/settings')}>
+          <Settings/>
+        </Button>
       </div>
 
       {/* Success Alert */}
