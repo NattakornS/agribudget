@@ -1,31 +1,29 @@
-import { useEffect, useState, useMemo } from "react";
-import { Bar } from "react-chartjs-2";
-import { useYearFilter } from "@/contexts/YearFilterContext";
-import { useCropFilter } from "@/contexts/CropFilterContext";
+import CropProductivityChart from "@/components/CropProductivityChart";
 import { ExpensePieChart } from "@/components/ExpensePieChart";
 import { FertilizerUsageTable } from "@/components/FertilizerUsageTable";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
-import { getIncome } from "@/services/incomeService";
-import { getExpenses } from "@/services/expenseService";
-import { getCrops } from "@/services/cropService";
-import type { Income, Expense, Crop, FertilizerPlan } from "@/types";
+import PriceAmountLineChart from "@/components/PriceAmountLineChart";
+import ProfitStackChart from "@/components/ProfitStackChart";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
+import { useCropFilter } from "@/contexts/CropFilterContext";
+import { useYearFilter } from "@/contexts/YearFilterContext";
+import { getCrops } from "@/services/cropService";
+import { getExpenses } from "@/services/expenseService";
 import { getFertilizerPlans } from "@/services/fertilizerService";
-import PriceAmountLineChart from "@/components/PriceAmountLineChart";
-import YearlyIncomeChart from "@/components/YearlyIncomeChart";
-import ProfitStackChart from "@/components/ProfitStackChart";
-import CropProductivityChart from "@/components/CropProductivityChart";
+import { getIncome } from "@/services/incomeService";
+import type { Crop, Expense, FertilizerPlan, Income } from "@/types";
+import {
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  Title,
+  Tooltip,
+} from "chart.js";
+import { AlertCircle, TrendingDown, TrendingUp } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 ChartJS.register(
   CategoryScale,
@@ -37,61 +35,61 @@ ChartJS.register(
 );
 
 // Function to process data for the chart
-const processChartData = (income: Income[], expenses: Expense[]) => {
-  const profitsByYearAndCrop: {
-    [year: string]: { [cropName: string]: { income: number; expense: number } };
-  } = {};
+// const processChartData = (income: Income[], expenses: Expense[]) => {
+//   const profitsByYearAndCrop: {
+//     [year: string]: { [cropName: string]: { income: number; expense: number } };
+//   } = {};
 
-  // Process income
-  income.forEach((inc) => {
-    const year = new Date(inc.income_date).getFullYear().toString();
-    const cropName = inc.crops?.name || "Uncategorized";
-    if (!profitsByYearAndCrop[year]) profitsByYearAndCrop[year] = {};
-    if (!profitsByYearAndCrop[year][cropName])
-      profitsByYearAndCrop[year][cropName] = { income: 0, expense: 0 };
-    profitsByYearAndCrop[year][cropName].income += inc.sub_total;
-  });
+//   // Process income
+//   income.forEach((inc) => {
+//     const year = new Date(inc.income_date).getFullYear().toString();
+//     const cropName = inc.crops?.name || "Uncategorized";
+//     if (!profitsByYearAndCrop[year]) profitsByYearAndCrop[year] = {};
+//     if (!profitsByYearAndCrop[year][cropName])
+//       profitsByYearAndCrop[year][cropName] = { income: 0, expense: 0 };
+//     profitsByYearAndCrop[year][cropName].income += inc.sub_total;
+//   });
 
-  // Process expenses
-  expenses.forEach((exp) => {
-    const year = new Date(exp.expense_date).getFullYear().toString();
-    const cropName = exp.crops?.name || "Uncategorized";
-    if (!profitsByYearAndCrop[year]) profitsByYearAndCrop[year] = {};
-    if (!profitsByYearAndCrop[year][cropName])
-      profitsByYearAndCrop[year][cropName] = { income: 0, expense: 0 };
-    profitsByYearAndCrop[year][cropName].expense += exp.amount;
-  });
+//   // Process expenses
+//   expenses.forEach((exp) => {
+//     const year = new Date(exp.expense_date).getFullYear().toString();
+//     const cropName = exp.crops?.name || "Uncategorized";
+//     if (!profitsByYearAndCrop[year]) profitsByYearAndCrop[year] = {};
+//     if (!profitsByYearAndCrop[year][cropName])
+//       profitsByYearAndCrop[year][cropName] = { income: 0, expense: 0 };
+//     profitsByYearAndCrop[year][cropName].expense += exp.amount;
+//   });
 
-  const years = Object.keys(profitsByYearAndCrop).sort();
-  const cropNames = [
-    ...new Set([
-      ...income.map((i) => i.crops?.name),
-      ...expenses.map((e) => e.crops?.name),
-    ]),
-  ].filter(Boolean) as string[];
+//   const years = Object.keys(profitsByYearAndCrop).sort();
+//   const cropNames = [
+//     ...new Set([
+//       ...income.map((i) => i.crops?.name),
+//       ...expenses.map((e) => e.crops?.name),
+//     ]),
+//   ].filter(Boolean) as string[];
 
-  const datasets = cropNames.map((cropName, index) => {
-    const data = years.map((year) => {
-      const yearData = profitsByYearAndCrop[year];
-      if (yearData && yearData[cropName]) {
-        return yearData[cropName].income - yearData[cropName].expense;
-      }
-      return 0;
-    });
+//   const datasets = cropNames.map((cropName, index) => {
+//     const data = years.map((year) => {
+//       const yearData = profitsByYearAndCrop[year];
+//       if (yearData && yearData[cropName]) {
+//         return yearData[cropName].income - yearData[cropName].expense;
+//       }
+//       return 0;
+//     });
 
-    const colorValue = (index * 50) % 255;
-    return {
-      label: `${cropName} Profit`,
-      data,
-      backgroundColor: `rgba(${colorValue}, 99, 132, 0.5)`,
-    };
-  });
+//     const colorValue = (index * 50) % 255;
+//     return {
+//       label: `${cropName} Profit`,
+//       data,
+//       backgroundColor: `rgba(${colorValue}, 99, 132, 0.5)`,
+//     };
+//   });
 
-  return {
-    labels: years,
-    datasets,
-  };
-};
+//   return {
+//     labels: years,
+//     datasets,
+//   };
+// };
 
 const DashboardPage = () => {
   const [income, setIncome] = useState<Income[]>([]);

@@ -31,7 +31,7 @@ const incomeSchema = z.object({
   income_date: z.string().min(1, 'Date is required'),
   category_name: z.string().min(1, 'Category is required'),
   detail: z.string().optional(),
-  linked_expense_ids: z.array(z.string()).optional(),
+  linked_expense_ids: z.array(z.string()),
 });
 
 const IncomePage = () => {

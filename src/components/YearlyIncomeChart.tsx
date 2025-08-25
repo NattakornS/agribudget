@@ -142,9 +142,9 @@ const YearlyIncomeChart: React.FC<YearlyIncomeChartProps> = ({
               duration: 1000,
               easing: 'easeInOutQuart',
             },
-            hover: {
-              animationDuration: 200,
-            },
+            // hover: {
+            //   animationDuration: 200,
+            // },
           },
         });
       }

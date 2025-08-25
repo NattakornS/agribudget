@@ -139,7 +139,7 @@ const ProfitStackChart: React.FC<IncomeBreakdownChartProps> = ({
                 labels: {
                   generateLabels: function(chart: any) {
                     const datasets = chart.data.datasets;
-                    const cropNames = [...new Set(datasets.map((d: any) => d.label?.split(' - ')[0]))];
+                    const cropNames = [...new Set(datasets.map((d: any) => d.label?.split(' - ')[0]))] as string[];
                     
                     return cropNames.map((cropName: string, index: number) => {
                       const hue = (index * 137.5) % 360;

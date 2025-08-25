@@ -251,7 +251,7 @@ const CropProductivityChart: React.FC<CropProductivityChartProps> = ({
                 },
                 grid: {
                   color: 'rgba(0, 0, 0, 0.1)',
-                  drawBorder: false
+                  // drawBorder: false
                 },
                 beginAtZero: true
               }
