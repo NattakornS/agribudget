@@ -1,52 +1,67 @@
-import { useMemo, useRef, useEffect } from 'react';
-import * as Chart from 'chart.js';
-import type { Crop, Income } from '@/types';
-
+import { useMemo, useRef, useEffect } from "react";
+import type { Crop, Income } from "@/types";
+import {
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  Title,
+  Tooltip,
+} from "chart.js";
 interface CropProductivityChartProps {
   crops: Crop[];
   incomeData: Income[];
   selectedYear?: number; // Optional: filter by specific year
 }
-
-const CropProductivityChart: React.FC<CropProductivityChartProps> = ({ 
-  crops, 
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
+const CropProductivityChart: React.FC<CropProductivityChartProps> = ({
+  crops,
   incomeData,
-  selectedYear 
+  selectedYear,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const chartRef = useRef<Chart.Chart | null>(null);
+  const chartRef = useRef<ChartJS | null>(null);
 
   const chartData = useMemo(() => {
     // Create a map of crop data for quick lookup
-    const cropMap = new Map(crops.map(crop => [crop.id, crop]));
-    
+    const cropMap = new Map(crops.map((crop) => [crop.id, crop]));
+
     // Group income by crop and year
-    const productivityData: { 
-      [cropId: string]: { 
-        [year: string]: number 
-      } 
+    const productivityData: {
+      [cropId: string]: {
+        [year: string]: number;
+      };
     } = {};
-    
-    incomeData.forEach(income => {
+
+    incomeData.forEach((income) => {
       const crop = cropMap.get(income.crop_id);
       if (!crop || !crop.area || crop.area <= 0) return; // Skip if no crop or area data
-      
+
       const year = new Date(income.income_date).getFullYear().toString();
-      
+
       // Filter by selected year if provided
       if (selectedYear && year !== selectedYear.toString()) return;
-      
+
       if (!productivityData[income.crop_id]) {
         productivityData[income.crop_id] = {};
       }
-      
+
       if (!productivityData[income.crop_id][year]) {
         productivityData[income.crop_id][year] = 0;
       }
-      
+
       productivityData[income.crop_id][year] += income.amount;
     });
-    
+
     // Calculate productivity (kg per rai per year)
     const processedData: {
       cropName: string;
@@ -55,13 +70,13 @@ const CropProductivityChart: React.FC<CropProductivityChartProps> = ({
       totalAmount: number;
       areaInRai: number;
     }[] = [];
-    
+
     Object.entries(productivityData).forEach(([cropId, yearData]) => {
       const crop = cropMap.get(cropId);
       if (!crop || !crop.area) return;
-      
+
       const areaInRai = crop.area / 1600; // Convert square meters to rai
-      
+
       Object.entries(yearData).forEach(([year, totalAmount]) => {
         const productivity = totalAmount / areaInRai;
         processedData.push({
@@ -69,38 +84,38 @@ const CropProductivityChart: React.FC<CropProductivityChartProps> = ({
           year,
           productivity: Math.round(productivity * 100) / 100,
           totalAmount: Math.round(totalAmount * 100) / 100,
-          areaInRai: Math.round(areaInRai * 100) / 100
+          areaInRai: Math.round(areaInRai * 100) / 100,
         });
       });
     });
-    
+
     // Sort by productivity for better visualization
     processedData.sort((a, b) => b.productivity - a.productivity);
-    
+
     // Prepare data for Chart.js
     // Group by year for multi-year comparison
-    const years = [...new Set(processedData.map(d => d.year))].sort();
-    const cropNames = [...new Set(processedData.map(d => d.cropName))];
-    
+    const years = [...new Set(processedData.map((d) => d.year))].sort();
+    const cropNames = [...new Set(processedData.map((d) => d.cropName))];
+
     // Create datasets for each year
     const datasets = years.map((year, index) => {
       const yearColors = [
-        { bg: 'rgba(34, 197, 94, 0.8)', border: '#22c55e' },
-        { bg: 'rgba(59, 130, 246, 0.8)', border: '#3b82f6' },
-        { bg: 'rgba(168, 85, 247, 0.8)', border: '#a855f7' },
-        { bg: 'rgba(236, 72, 153, 0.8)', border: '#ec4899' },
-        { bg: 'rgba(251, 146, 60, 0.8)', border: '#fb923c' }
+        { bg: "rgba(34, 197, 94, 0.8)", border: "#22c55e" },
+        { bg: "rgba(59, 130, 246, 0.8)", border: "#3b82f6" },
+        { bg: "rgba(168, 85, 247, 0.8)", border: "#a855f7" },
+        { bg: "rgba(236, 72, 153, 0.8)", border: "#ec4899" },
+        { bg: "rgba(251, 146, 60, 0.8)", border: "#fb923c" },
       ];
-      
+
       const color = yearColors[index % yearColors.length];
-      
-      const data = cropNames.map(cropName => {
+
+      const data = cropNames.map((cropName) => {
         const record = processedData.find(
-          d => d.cropName === cropName && d.year === year
+          (d) => d.cropName === cropName && d.year === year
         );
         return record ? record.productivity : 0;
       });
-      
+
       return {
         label: `Year ${year}`,
         data,
@@ -109,48 +124,38 @@ const CropProductivityChart: React.FC<CropProductivityChartProps> = ({
         borderWidth: 2,
       };
     });
-    
+
     // Store additional data for tooltips
     const tooltipData = processedData.reduce((acc, item) => {
       const key = `${item.cropName}-${item.year}`;
       acc[key] = {
         totalAmount: item.totalAmount,
-        areaInRai: item.areaInRai
+        areaInRai: item.areaInRai,
       };
       return acc;
     }, {} as Record<string, { totalAmount: number; areaInRai: number }>);
-    
+
     return {
       labels: cropNames,
       datasets,
-      tooltipData
+      tooltipData,
     };
   }, [crops, incomeData, selectedYear]);
 
   useEffect(() => {
-    // Register Chart.js components
-    Chart.Chart.register(
-      Chart.CategoryScale,
-      Chart.LinearScale,
-      Chart.BarElement,
-      Chart.Title,
-      Chart.Tooltip,
-      Chart.Legend
-    );
-
     if (canvasRef.current && chartData.labels.length > 0) {
       // Destroy existing chart if it exists
       if (chartRef.current) {
         chartRef.current.destroy();
       }
 
-      const ctx = canvasRef.current.getContext('2d');
+      const ctx = canvasRef.current.getContext("2d");
       if (ctx) {
-        chartRef.current = new Chart.Chart(ctx, {
-          type: 'bar',
+        chartRef.current = new ChartJS(ctx, {
+          type: "bar",
           data: {
             labels: chartData.labels,
-            datasets: chartData.datasets
+            datasets: chartData.datasets,
           },
           options: {
             responsive: true,
@@ -158,108 +163,110 @@ const CropProductivityChart: React.FC<CropProductivityChartProps> = ({
             plugins: {
               title: {
                 display: true,
-                text: 'Crop Productivity Analysis (kg per rai per year)',
+                text: "Crop Productivity Analysis (kg per rai per year)",
                 font: {
                   size: 18,
-                  weight: 'bold',
+                  weight: "bold",
                 },
-                padding: 20
+                padding: 20,
               },
               legend: {
-                position: 'top',
+                position: "top",
                 labels: {
                   padding: 15,
                   font: {
-                    size: 12
-                  }
-                }
+                    size: 12,
+                  },
+                },
               },
               tooltip: {
                 callbacks: {
-                  title: function(context: any) {
+                  title: function (context: any) {
                     return context[0].label;
                   },
-                  label: function(context: any) {
+                  label: function (context: any) {
                     const cropName = context.label;
-                    const year = context.dataset.label.replace('Year ', '');
+                    const year = context.dataset.label.replace("Year ", "");
                     const productivity = context.parsed.y;
                     const key = `${cropName}-${year}`;
                     const additionalData = chartData.tooltipData[key];
-                    
+
                     if (additionalData && productivity > 0) {
                       return [
                         `${context.dataset.label}`,
                         `Productivity: ${productivity.toLocaleString()} kg/rai/year`,
                         `Total Amount: ${additionalData.totalAmount.toLocaleString()} kg`,
-                        `Area: ${additionalData.areaInRai.toLocaleString()} rai`
+                        `Area: ${additionalData.areaInRai.toLocaleString()} rai`,
                       ];
                     }
-                    return `${context.dataset.label}: ${productivity.toLocaleString()} kg/rai/year`;
-                  }
+                    return `${
+                      context.dataset.label
+                    }: ${productivity.toLocaleString()} kg/rai/year`;
+                  },
                 },
                 displayColors: true,
-                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                titleColor: '#fff',
-                bodyColor: '#fff',
-                borderColor: 'rgba(255, 255, 255, 0.2)',
+                backgroundColor: "rgba(0, 0, 0, 0.8)",
+                titleColor: "#fff",
+                bodyColor: "#fff",
+                borderColor: "rgba(255, 255, 255, 0.2)",
                 borderWidth: 1,
                 padding: 12,
                 bodySpacing: 4,
-                titleMarginBottom: 8
-              }
+                titleMarginBottom: 8,
+              },
             },
             scales: {
               x: {
                 display: true,
                 title: {
                   display: true,
-                  text: 'Crops',
+                  text: "Crops",
                   font: {
                     size: 14,
-                    weight: 'bold'
-                  }
+                    weight: "bold",
+                  },
                 },
                 ticks: {
                   maxRotation: 45,
                   minRotation: 0,
                   autoSkip: false,
                   font: {
-                    size: 11
-                  }
+                    size: 11,
+                  },
                 },
                 grid: {
-                  display: false
-                }
+                  display: false,
+                },
               },
               y: {
                 display: true,
                 title: {
                   display: true,
-                  text: 'Productivity (kg/rai/year)',
+                  text: "Productivity (kg/rai/year)",
                   font: {
                     size: 14,
-                    weight: 'bold'
-                  }
+                    weight: "bold",
+                  },
                 },
                 ticks: {
-                  callback: function(value: any) {
+                  callback: function (value: any) {
                     return Number(value).toLocaleString();
                   },
                   font: {
-                    size: 11
-                  }
+                    size: 11,
+                  },
                 },
                 grid: {
-                  color: 'rgba(0, 0, 0, 0.1)',
+                  color: "rgba(0, 0, 0, 0.1)",
                   // drawBorder: false
                 },
-                beginAtZero: true
-              }
+                beginAtZero: true,
+              },
             },
             interaction: {
-              mode: 'index',
-              intersect: false
-            }
+              mode: "index",
+              intersect: false,
+            },
           },
         });
       }
@@ -280,7 +287,7 @@ const CropProductivityChart: React.FC<CropProductivityChartProps> = ({
         <div className="text-center">
           <p className="text-lg text-gray-600 mb-2">No data available</p>
           <p className="text-sm text-gray-500">
-            {crops.length === 0 ? 'No crops found' : 'No income data found'}
+            {crops.length === 0 ? "No crops found" : "No income data found"}
           </p>
         </div>
       </div>
@@ -291,9 +298,12 @@ const CropProductivityChart: React.FC<CropProductivityChartProps> = ({
     return (
       <div className="flex items-center justify-center h-[500px] bg-gray-50 rounded-lg">
         <div className="text-center">
-          <p className="text-lg text-gray-600 mb-2">Insufficient data for analysis</p>
+          <p className="text-lg text-gray-600 mb-2">
+            Insufficient data for analysis
+          </p>
           <p className="text-sm text-gray-500">
-            Crops need area data and associated income records to calculate productivity
+            Crops need area data and associated income records to calculate
+            productivity
           </p>
         </div>
       </div>
@@ -356,15 +366,15 @@ export default CropProductivityChart;
 //     { id: '1', income_date: '2024-03-15', crop_id: '1', amount: 1200, price: 15000, unit: 'kg' },
 //     { id: '2', income_date: '2024-06-20', crop_id: '1', amount: 1300, price: 16000, unit: 'kg' },
 //     { id: '3', income_date: '2024-09-10', crop_id: '1', amount: 1100, price: 14000, unit: 'kg' },
-    
+
 //     // Corn Field B - 2024
 //     { id: '4', income_date: '2024-04-01', crop_id: '2', amount: 2400, price: 18000, unit: 'kg' },
 //     { id: '5', income_date: '2024-08-15', crop_id: '2', amount: 2600, price: 20000, unit: 'kg' },
-    
+
 //     // Cassava Field C - 2024
 //     { id: '6', income_date: '2024-05-10', crop_id: '3', amount: 4800, price: 9600, unit: 'kg' },
 //     { id: '7', income_date: '2024-11-20', crop_id: '3', amount: 5200, price: 10400, unit: 'kg' },
-    
+
 //     // Some 2023 data for comparison
 //     { id: '8', income_date: '2023-03-15', crop_id: '1', amount: 1000, price: 13000, unit: 'kg' },
 //     { id: '9', income_date: '2023-06-20', crop_id: '1', amount: 1100, price: 14000, unit: 'kg' },
@@ -375,8 +385,8 @@ export default CropProductivityChart;
 //   return (
 //     <div className="p-6 bg-gray-100 min-h-screen">
 //       <h1 className="text-2xl font-bold mb-6">Crop Productivity Analysis</h1>
-//       <CropProductivityChart 
-//         crops={mockCrops} 
+//       <CropProductivityChart
+//         crops={mockCrops}
 //         incomeData={mockIncomeData}
 //       />
 //     </div>
