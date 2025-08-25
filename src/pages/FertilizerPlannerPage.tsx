@@ -7,10 +7,12 @@ import type { Crop, Expense, FertilizerPlan, FertilizerPlanFormData, PlanStatus 
 import { getCrops } from '@/services/cropService';
 import { getExpenses } from '@/services/expenseService';
 import { getFertilizerPlans, createFertilizerPlan, deleteFertilizerPlan, updatePlanStatus, updateFertilizerPlan } from '@/services/fertilizerService';
+import { KanbanBoard } from '@/components/fertilizer/KanbanBoard';
+import { ViewToggle } from '@/components/fertilizer/ViewToggle';
 import FloatingActionButton from '@/components/FloatingActionButton';
 import RecordList from '@/components/RecordList';
 import EditModal from '@/components/EditModal';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -41,6 +43,7 @@ const FertilizerPlannerPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<FertilizerPlan | null>(null);
   const [selectedExpenseIds, setSelectedExpenseIds] = useState<string[]>([]);
+  const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
 
   const { selectedYear, isAllYears } = useYearFilter();
 
@@ -335,11 +338,14 @@ const FertilizerPlannerPage = () => {
   return (
     <div className="space-y-6 pb-20">
       {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Fertilizer Planner</h1>
-        <p className="text-muted-foreground">
-          Plan and track your fertilizer applications
-        </p>
+      <div className="flex items-center justify-between mb-4">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight">Fertilizer Planner</h1>
+          <p className="text-muted-foreground">
+            Plan and track your fertilizer applications
+          </p>
+        </div>
+        <ViewToggle view={viewMode} onViewChange={setViewMode} />
       </div>
 
       {/* Error Alert */}
@@ -351,67 +357,60 @@ const FertilizerPlannerPage = () => {
       )}
 
       {/* Status Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Clock className="h-5 w-5 text-gray-500" />
-              Planned
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-600">
-              {statusCounts.plan}
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
+        <Card className="p-2 sm:p-4">
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
+            <div>
+              <div className="text-base sm:text-lg font-semibold">Planned</div>
+              <div className="text-lg sm:text-2xl font-bold text-gray-600">{statusCounts.plan}</div>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Plans to execute
-            </p>
-          </CardContent>
+          </div>
         </Card>
         
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <PlayCircle className="h-5 w-5 text-blue-500" />
-              In Progress
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
-              {statusCounts.doing}
+        <Card className="p-2 sm:p-4">
+          <div className="flex items-center gap-2">
+            <PlayCircle className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+            <div>
+              <div className="text-base sm:text-lg font-semibold">In Progress</div>
+              <div className="text-lg sm:text-2xl font-bold text-blue-600">{statusCounts.doing}</div>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Currently applying
-            </p>
-          </CardContent>
+          </div>
         </Card>
         
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <CheckCircle2 className="h-5 w-5 text-green-500" />
-              Completed
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {statusCounts.complete}
+        <Card className="p-2 sm:p-4">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
+            <div>
+              <div className="text-base sm:text-lg font-semibold">Done</div>
+              <div className="text-lg sm:text-2xl font-bold text-green-600">{statusCounts.complete}</div>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Successfully applied
-            </p>
-          </CardContent>
+          </div>
         </Card>
       </div>
 
       {/* Plans List */}
-      <RecordList
-        records={filteredPlans}
-        onRecordClick={handleOpenModal}
-        renderItem={renderPlanItem}
-      />
-
-      <FloatingActionButton onClick={() => handleOpenModal()} />
+      <div className="relative">
+        {viewMode === 'list' ? (
+          <RecordList
+            records={filteredPlans}
+            onRecordClick={handleOpenModal}
+            renderItem={renderPlanItem}
+          />
+        ) : (
+          <KanbanBoard 
+            plans={filteredPlans} 
+            onStatusUpdate={(updatedPlan) => {
+              setPlans(prevPlans => 
+                prevPlans.map(plan => 
+                  plan.id === updatedPlan.id ? updatedPlan : plan
+                )
+              );
+            }} 
+          />
+        )}
+        <FloatingActionButton onClick={() => handleOpenModal()} />
+      </div>
 
       <EditModal
         isOpen={isModalOpen}

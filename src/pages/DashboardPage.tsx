@@ -1,9 +1,9 @@
-import { useEffect, useState, useMemo } from 'react';
-import { Bar } from 'react-chartjs-2';
-import { useYearFilter } from '@/contexts/YearFilterContext';
-import { useCropFilter } from '@/contexts/CropFilterContext';
-import { ExpensePieChart } from '@/components/ExpensePieChart';
-import { FertilizerUsageTable } from '@/components/FertilizerUsageTable';
+import { useEffect, useState, useMemo } from "react";
+import { Bar } from "react-chartjs-2";
+import { useYearFilter } from "@/contexts/YearFilterContext";
+import { useCropFilter } from "@/contexts/CropFilterContext";
+import { ExpensePieChart } from "@/components/ExpensePieChart";
+import { FertilizerUsageTable } from "@/components/FertilizerUsageTable";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -12,16 +12,20 @@ import {
   Title,
   Tooltip,
   Legend,
-} from 'chart.js';
-import { getIncome } from '@/services/incomeService';
-import { getExpenses } from '@/services/expenseService';
-import { getCrops } from '@/services/cropService';
-import type { Income, Expense, Crop, FertilizerPlan } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
-import { getFertilizerPlans } from '@/services/fertilizerService';
+} from "chart.js";
+import { getIncome } from "@/services/incomeService";
+import { getExpenses } from "@/services/expenseService";
+import { getCrops } from "@/services/cropService";
+import type { Income, Expense, Crop, FertilizerPlan } from "@/types";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
+import { getFertilizerPlans } from "@/services/fertilizerService";
+import PriceAmountLineChart from "@/components/PriceAmountLineChart";
+import YearlyIncomeChart from "@/components/YearlyIncomeChart";
+import ProfitStackChart from "@/components/ProfitStackChart";
+import CropProductivityChart from "@/components/CropProductivityChart";
 
 ChartJS.register(
   CategoryScale,
@@ -34,32 +38,40 @@ ChartJS.register(
 
 // Function to process data for the chart
 const processChartData = (income: Income[], expenses: Expense[]) => {
-  
-  const profitsByYearAndCrop: { [year: string]: { [cropName: string]: { income: number, expense: number } } } = {};
+  const profitsByYearAndCrop: {
+    [year: string]: { [cropName: string]: { income: number; expense: number } };
+  } = {};
 
   // Process income
-  income.forEach(inc => {
+  income.forEach((inc) => {
     const year = new Date(inc.income_date).getFullYear().toString();
-    const cropName = inc.crops?.name || 'Uncategorized';
+    const cropName = inc.crops?.name || "Uncategorized";
     if (!profitsByYearAndCrop[year]) profitsByYearAndCrop[year] = {};
-    if (!profitsByYearAndCrop[year][cropName]) profitsByYearAndCrop[year][cropName] = { income: 0, expense: 0 };
+    if (!profitsByYearAndCrop[year][cropName])
+      profitsByYearAndCrop[year][cropName] = { income: 0, expense: 0 };
     profitsByYearAndCrop[year][cropName].income += inc.sub_total;
   });
 
   // Process expenses
-  expenses.forEach(exp => {
+  expenses.forEach((exp) => {
     const year = new Date(exp.expense_date).getFullYear().toString();
-    const cropName = exp.crops?.name || 'Uncategorized';
+    const cropName = exp.crops?.name || "Uncategorized";
     if (!profitsByYearAndCrop[year]) profitsByYearAndCrop[year] = {};
-    if (!profitsByYearAndCrop[year][cropName]) profitsByYearAndCrop[year][cropName] = { income: 0, expense: 0 };
+    if (!profitsByYearAndCrop[year][cropName])
+      profitsByYearAndCrop[year][cropName] = { income: 0, expense: 0 };
     profitsByYearAndCrop[year][cropName].expense += exp.amount;
   });
 
   const years = Object.keys(profitsByYearAndCrop).sort();
-  const cropNames = [...new Set([...income.map(i => i.crops?.name), ...expenses.map(e => e.crops?.name)])].filter(Boolean) as string[];
+  const cropNames = [
+    ...new Set([
+      ...income.map((i) => i.crops?.name),
+      ...expenses.map((e) => e.crops?.name),
+    ]),
+  ].filter(Boolean) as string[];
 
   const datasets = cropNames.map((cropName, index) => {
-    const data = years.map(year => {
+    const data = years.map((year) => {
       const yearData = profitsByYearAndCrop[year];
       if (yearData && yearData[cropName]) {
         return yearData[cropName].income - yearData[cropName].expense;
@@ -81,7 +93,6 @@ const processChartData = (income: Income[], expenses: Expense[]) => {
   };
 };
 
-
 const DashboardPage = () => {
   const [income, setIncome] = useState<Income[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -93,12 +104,13 @@ const DashboardPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [incomeData, expensesData, cropsData,fertilizerPlanData] = await Promise.all([
-          getIncome(),
-          getExpenses(),
-          getCrops(),
-          getFertilizerPlans()
-        ]);
+        const [incomeData, expensesData, cropsData, fertilizerPlanData] =
+          await Promise.all([
+            getIncome(),
+            getExpenses(),
+            getCrops(),
+            getFertilizerPlans(),
+          ]);
         setIncome(incomeData as unknown as Income[]);
         setExpenses(expensesData as unknown as Expense[]);
         setCrops(cropsData as unknown as Crop[]);
@@ -113,42 +125,51 @@ const DashboardPage = () => {
     fetchData();
   }, []);
 
-
   const { selectedYear, isAllYears } = useYearFilter();
   const { selectedCropId } = useCropFilter();
 
   // Filter data by year and crop
   const filteredIncome = useMemo(() => {
     let filtered = income;
-    
+
     if (!isAllYears) {
-      filtered = filtered.filter(inc => new Date(inc.income_date).getFullYear() === selectedYear);
+      filtered = filtered.filter(
+        (inc) => new Date(inc.income_date).getFullYear() === selectedYear
+      );
     }
-    
+
     if (selectedCropId) {
-      filtered = filtered.filter(inc => inc.crop_id === selectedCropId);
+      filtered = filtered.filter((inc) => inc.crop_id === selectedCropId);
     }
-    
+
     return filtered;
   }, [income, selectedYear, isAllYears, selectedCropId]);
 
   const filteredExpenses = useMemo(() => {
     let filtered = expenses;
-    
+
     if (!isAllYears) {
-      filtered = filtered.filter(exp => new Date(exp.expense_date).getFullYear() === selectedYear);
+      filtered = filtered.filter(
+        (exp) => new Date(exp.expense_date).getFullYear() === selectedYear
+      );
     }
-    
+
     if (selectedCropId) {
-      filtered = filtered.filter(exp => exp.crop_id === selectedCropId);
+      filtered = filtered.filter((exp) => exp.crop_id === selectedCropId);
     }
-    
+
     return filtered;
   }, [expenses, selectedYear, isAllYears, selectedCropId]);
 
   const chartData = processChartData(filteredIncome, filteredExpenses);
-  const totalIncome = filteredIncome.reduce((acc, curr) => acc + curr.sub_total, 0);
-  const totalExpenses = filteredExpenses.reduce((acc, curr) => acc + curr.amount, 0);
+  const totalIncome = filteredIncome.reduce(
+    (acc, curr) => acc + curr.total,
+    0
+  );
+  const totalExpenses = filteredExpenses.reduce(
+    (acc, curr) => acc + curr.total,
+    0
+  );
 
   if (loading) {
     return (
@@ -208,10 +229,12 @@ const DashboardPage = () => {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Expenses
+            </CardTitle>
             <TrendingDown className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -223,26 +246,30 @@ const DashboardPage = () => {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Net Profit</CardTitle>
             <div className="h-4 w-4 text-muted-foreground">฿</div>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${
-              totalIncome - totalExpenses >= 0 
-                ? 'text-green-600' 
-                : 'text-red-600'
-            }`}>
+            <div
+              className={`text-2xl font-bold ${
+                totalIncome - totalExpenses >= 0
+                  ? "text-green-600"
+                  : "text-red-600"
+              }`}
+            >
               ฿{(totalIncome - totalExpenses).toFixed(2)}
             </div>
-            <p className={`text-xs ${
-              totalIncome - totalExpenses >= 0 
-                ? 'text-green-600' 
-                : 'text-red-600'
-            }`}>
-              {totalIncome - totalExpenses >= 0 ? 'Profitable' : 'Loss'}
+            <p
+              className={`text-xs ${
+                totalIncome - totalExpenses >= 0
+                  ? "text-green-600"
+                  : "text-red-600"
+              }`}
+            >
+              {totalIncome - totalExpenses >= 0 ? "Profitable" : "Loss"}
             </p>
           </CardContent>
         </Card>
@@ -251,7 +278,7 @@ const DashboardPage = () => {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Profit Chart */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Profit by Crop and Year</CardTitle>
           </CardHeader>
@@ -263,38 +290,63 @@ const DashboardPage = () => {
                   responsive: true,
                   maintainAspectRatio: false,
                   scales: {
-                  y: {
-                    beginAtZero: true,
-                    ticks: {
-                      callback: (value) => `$${value}`
-                    }
-                  }
-                },
-                plugins: {
-                  legend: {
-                    position: 'bottom'
+                    y: {
+                      beginAtZero: true,
+                      ticks: {
+                        callback: (value) => `$${value}`,
+                      },
+                    },
                   },
-                  tooltip: {
-                    callbacks: {
-                      label: (context) => `$${context.parsed.y.toFixed(2)}`
-                    }
-                  }
-                }
-              }}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Expense Treemap */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Expenses by Category</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ExpensePieChart expenses={filteredExpenses} />
-        </CardContent>
+                  plugins: {
+                    legend: {
+                      position: "bottom",
+                    },
+                    tooltip: {
+                      callbacks: {
+                        label: (context) => `$${context.parsed.y.toFixed(2)}`,
+                      },
+                    },
+                  },
+                }}
+              />
+            </div>
+          </CardContent>
+        </Card> */}
+         <Card>
+          <CardHeader>
+            <CardTitle>Profit by Crop and Year</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ProfitStackChart expenses={filteredExpenses} income={filteredIncome}></ProfitStackChart>
+          </CardContent>
         </Card>
+        {/* Expense Treemap */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Expenses by Category</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ExpensePieChart expenses={filteredExpenses} />
+          </CardContent>
+        </Card>
+        {/* Income Price/amount */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Price/Amount</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PriceAmountLineChart filteredIncome={filteredIncome} />
+          </CardContent>
+        </Card>
+        {/* Income each year */}
+        {/* <Card>
+          <CardHeader>
+            <CardTitle>Income Each year</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <YearlyIncomeChart income={filteredIncome} />
+          </CardContent>
+        </Card> */}
       </div>
 
       {/* Fertilizer Usage Table */}
@@ -303,10 +355,25 @@ const DashboardPage = () => {
           <CardTitle>Fertilizer Usage per Tree</CardTitle>
         </CardHeader>
         <CardContent>
-          <FertilizerUsageTable fertilizerPlans={fertilizerPlan} crops={crops} />
+          <FertilizerUsageTable
+            fertilizerPlans={fertilizerPlan}
+            crops={crops}
+          />
         </CardContent>
       </Card>
-      <div className='p-5'></div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Crop Productivity</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <CropProductivityChart
+            incomeData={filteredIncome}
+            crops={crops}
+          />
+        </CardContent>
+      </Card>
+      <div className="p-5"></div>
     </div>
   );
-};export default DashboardPage;
+};
+export default DashboardPage;

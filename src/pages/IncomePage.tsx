@@ -26,12 +26,12 @@ const incomeSchema = z.object({
   price: z.number().positive('Price must be a positive number'),
   unit: z.string().optional(),
   amount: z.number().positive('Amount must be a positive number'),
-  sub_total: z.number().positive('Sub-total must be a positive number'),
-  total: z.number().positive('Total must be a positive number'),
+  sub_total: z.number(),//.positive('Sub-total must be a positive number'),
+  total: z.number(),//.positive('Total must be a positive number').optional(),
   income_date: z.string().min(1, 'Date is required'),
   category_name: z.string().min(1, 'Category is required'),
   detail: z.string().optional(),
-  linked_expense_ids: z.array(z.string()),
+  linked_expense_ids: z.array(z.string()).optional(),
 });
 
 const IncomePage = () => {
@@ -353,9 +353,11 @@ const IncomePage = () => {
           reset(defaultValues);
         }}
         onSave={handleSubmit((data: IncomeFormData) => {
+          console.log(data);
           if (selectedIncome) {
             return handleUpdateIncome(data);
           }
+          
           return handleAddIncome(data);
         })}
         onDelete={selectedIncome ? () => {
