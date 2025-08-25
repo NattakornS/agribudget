@@ -27,7 +27,7 @@ export const ExpensePieChart = ({ expenses }: ExpensePieChartProps) => {
       if (!acc[categoryName]) {
         acc[categoryName] = 0;
       }
-      acc[categoryName] += expense.amount;
+      acc[categoryName] += expense.total;
       return acc;
     }, {} as Record<string, number>);
     
