@@ -14,26 +14,14 @@ import { getFertilizerPlans } from "@/services/fertilizerService";
 import { getIncome } from "@/services/incomeService";
 import type { Crop, Expense, FertilizerPlan, Income } from "@/types";
 import {
-  BarElement,
-  CategoryScale,
   Chart as ChartJS,
-  Legend,
-  LinearScale,
-  Title,
-  Tooltip,
+  registerables
 } from "chart.js";
 import { AlertCircle, TrendingDown, TrendingUp } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
 
+ChartJS.register(...registerables);
 // Function to process data for the chart
 // const processChartData = (income: Income[], expenses: Expense[]) => {
 //   const profitsByYearAndCrop: {

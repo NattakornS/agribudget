@@ -1,21 +1,27 @@
-import { useMemo, useRef, useEffect } from 'react';
-import * as Chart from 'chart.js';
-import type { Income } from '@/types';
+import { useMemo, useRef, useEffect } from "react";
+import * as Chart from "chart.js";
+import type { Income } from "@/types";
 interface YearlyIncomeChartProps {
   income: Income[];
 }
-
-const YearlyIncomeChart: React.FC<YearlyIncomeChartProps> = ({ 
-  income 
-}) => {
+// Register Chart.js components
+Chart.Chart.register(
+  Chart.CategoryScale,
+  Chart.LinearScale,
+  Chart.BarElement,
+  Chart.Title,
+  Chart.Tooltip,
+  Chart.Legend
+);
+const YearlyIncomeChart: React.FC<YearlyIncomeChartProps> = ({ income }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart.Chart | null>(null);
 
   const chartData = useMemo(() => {
     // Group income by year
     const incomeByYear: { [year: string]: number } = {};
-    
-    income.forEach(inc => {
+
+    income.forEach((inc) => {
       const year = new Date(inc.income_date).getFullYear().toString();
       if (!incomeByYear[year]) {
         incomeByYear[year] = 0;
@@ -25,7 +31,9 @@ const YearlyIncomeChart: React.FC<YearlyIncomeChartProps> = ({
 
     // Sort years and prepare data
     const years = Object.keys(incomeByYear).sort();
-    const totalIncomes = years.map(year => Math.round(incomeByYear[year] * 100) / 100);
+    const totalIncomes = years.map(
+      (year) => Math.round(incomeByYear[year] * 100) / 100
+    );
 
     // Generate gradient colors for bars
     const colors = years.map((_, index) => {
@@ -33,13 +41,13 @@ const YearlyIncomeChart: React.FC<YearlyIncomeChartProps> = ({
       return `hsl(${hue}, 70%, 60%)`;
     });
 
-    const backgroundColors = colors.map(color => color.replace('60%', '20%'));
+    const backgroundColors = colors.map((color) => color.replace("60%", "20%"));
 
     return {
       labels: years,
       datasets: [
         {
-          label: 'Total Income (฿)',
+          label: "Total Income (฿)",
           data: totalIncomes,
           backgroundColor: backgroundColors,
           borderColor: colors,
@@ -52,26 +60,16 @@ const YearlyIncomeChart: React.FC<YearlyIncomeChartProps> = ({
   }, [income]);
 
   useEffect(() => {
-    // Register Chart.js components
-    Chart.Chart.register(
-      Chart.CategoryScale,
-      Chart.LinearScale,
-      Chart.BarElement,
-      Chart.Title,
-      Chart.Tooltip,
-      Chart.Legend
-    );
-
     if (canvasRef.current) {
       // Destroy existing chart if it exists
       if (chartRef.current) {
         chartRef.current.destroy();
       }
 
-      const ctx = canvasRef.current.getContext('2d');
+      const ctx = canvasRef.current.getContext("2d");
       if (ctx) {
         chartRef.current = new Chart.Chart(ctx, {
-          type: 'bar',
+          type: "bar",
           data: chartData,
           options: {
             responsive: true,
@@ -79,10 +77,10 @@ const YearlyIncomeChart: React.FC<YearlyIncomeChartProps> = ({
             plugins: {
               title: {
                 display: true,
-                text: 'Total Income by Year',
+                text: "Total Income by Year",
                 font: {
                   size: 16,
-                  weight: 'bold',
+                  weight: "bold",
                 },
               },
               legend: {
@@ -90,15 +88,15 @@ const YearlyIncomeChart: React.FC<YearlyIncomeChartProps> = ({
               },
               tooltip: {
                 callbacks: {
-                  label: function(context: any) {
+                  label: function (context: any) {
                     const value = context.parsed.y;
                     return `Total Income: ฿${Number(value).toLocaleString()}`;
                   },
                 },
-                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                titleColor: 'white',
-                bodyColor: 'white',
-                borderColor: 'rgba(255, 255, 255, 0.1)',
+                backgroundColor: "rgba(0, 0, 0, 0.8)",
+                titleColor: "white",
+                bodyColor: "white",
+                borderColor: "rgba(255, 255, 255, 0.1)",
                 borderWidth: 1,
               },
             },
@@ -107,10 +105,10 @@ const YearlyIncomeChart: React.FC<YearlyIncomeChartProps> = ({
                 display: true,
                 title: {
                   display: true,
-                  text: 'Year',
+                  text: "Year",
                   font: {
                     size: 14,
-                    weight: 'bold',
+                    weight: "bold",
                   },
                 },
                 grid: {
@@ -121,26 +119,26 @@ const YearlyIncomeChart: React.FC<YearlyIncomeChartProps> = ({
                 display: true,
                 title: {
                   display: true,
-                  text: 'Total Income (฿)',
+                  text: "Total Income (฿)",
                   font: {
                     size: 14,
-                    weight: 'bold',
+                    weight: "bold",
                   },
                 },
                 ticks: {
-                  callback: function(value: any) {
-                    return '฿' + Number(value).toLocaleString();
+                  callback: function (value: any) {
+                    return "฿" + Number(value).toLocaleString();
                   },
                 },
                 beginAtZero: true,
                 grid: {
-                  color: 'rgba(0, 0, 0, 0.1)',
+                  color: "rgba(0, 0, 0, 0.1)",
                 },
               },
             },
             animation: {
               duration: 1000,
-              easing: 'easeInOutQuart',
+              easing: "easeInOutQuart",
             },
             // hover: {
             //   animationDuration: 200,
@@ -181,7 +179,9 @@ const YearlyIncomeChart: React.FC<YearlyIncomeChartProps> = ({
           <div className="text-xl font-bold text-blue-800">{years.length}</div>
         </div>
         <div className="bg-gradient-to-r from-green-50 to-green-100 p-3 rounded-lg">
-          <div className="text-sm text-green-600 font-medium">Avg. Yearly Income</div>
+          <div className="text-sm text-green-600 font-medium">
+            Avg. Yearly Income
+          </div>
           <div className="text-xl font-bold text-green-800">
             ฿{avgYearlyIncome.toLocaleString()}
           </div>
