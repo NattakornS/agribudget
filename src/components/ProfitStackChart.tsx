@@ -1,23 +1,41 @@
-import { useMemo, useRef, useEffect } from 'react';
-import * as Chart from 'chart.js';
-import type { Expense, Income } from '@/types';
-
+import { useMemo, useRef, useEffect } from "react";
+import {
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  Title,
+  Tooltip,
+} from "chart.js";
+import type { Expense, Income } from "@/types";
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 interface IncomeBreakdownChartProps {
   income: Income[];
   expenses: Expense[];
 }
 
-const ProfitStackChart: React.FC<IncomeBreakdownChartProps> = ({ 
+const ProfitStackChart: React.FC<IncomeBreakdownChartProps> = ({
   income,
-  expenses 
+  expenses,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const chartRef = useRef<Chart.Chart | null>(null);
+  const chartRef = useRef<ChartJS | null>(null);
 
   // Function to process data for the stacked chart
   const processChartData = (income: Income[], expenses: Expense[]) => {
     const profitsByYearAndCrop: {
-      [year: string]: { [cropName: string]: { income: number; expense: number } };
+      [year: string]: {
+        [cropName: string]: { income: number; expense: number };
+      };
     } = {};
 
     // Process income
@@ -101,26 +119,16 @@ const ProfitStackChart: React.FC<IncomeBreakdownChartProps> = ({
   }, [income, expenses]);
 
   useEffect(() => {
-    // Register Chart.js components
-    Chart.Chart.register(
-      Chart.CategoryScale,
-      Chart.LinearScale,
-      Chart.BarElement,
-      Chart.Title,
-      Chart.Tooltip,
-      Chart.Legend
-    );
-
     if (canvasRef.current && chartData.labels.length > 0) {
       // Destroy existing chart if it exists
       if (chartRef.current) {
         chartRef.current.destroy();
       }
 
-      const ctx = canvasRef.current.getContext('2d');
+      const ctx = canvasRef.current.getContext("2d");
       if (ctx) {
-        chartRef.current = new Chart.Chart(ctx, {
-          type: 'bar',
+        chartRef.current = new ChartJS(ctx, {
+          type: "bar",
           data: chartData,
           options: {
             responsive: true,
@@ -128,23 +136,27 @@ const ProfitStackChart: React.FC<IncomeBreakdownChartProps> = ({
             plugins: {
               title: {
                 display: true,
-                text: 'Income Breakdown: Expenses + Profit by Crop and Year',
+                text: "Income Breakdown: Expenses + Profit by Crop and Year",
                 font: {
                   size: 16,
-                  weight: 'bold',
+                  weight: "bold",
                 },
               },
               legend: {
                 position: "bottom",
                 labels: {
-                  generateLabels: function(chart: any) {
+                  generateLabels: function (chart: any) {
                     const datasets = chart.data.datasets;
-                    const cropNames = [...new Set(datasets.map((d: any) => d.label?.split(' - ')[0]))] as string[];
-                    
+                    const cropNames = [
+                      ...new Set(
+                        datasets.map((d: any) => d.label?.split(" - ")[0])
+                      ),
+                    ] as string[];
+
                     return cropNames.map((cropName: string, index: number) => {
                       const hue = (index * 137.5) % 360;
                       return {
-                        text: cropName || 'Unknown',
+                        text: cropName || "Unknown",
                         fillStyle: `hsl(${hue}, 70%, 55%)`,
                         strokeStyle: `hsl(${hue}, 70%, 55%)`,
                         lineWidth: 1,
@@ -155,56 +167,56 @@ const ProfitStackChart: React.FC<IncomeBreakdownChartProps> = ({
                   },
                 },
               },
-            //   tooltip: {
-            //     mode: 'index',
-            //     intersect: true,
-            //     callbacks: {
-            //       title: function(context: any) {
-            //         return `Year: ${context[0].label}`;
-            //       },
-            //       label: function(context: any) {
-            //         const value = context.parsed.y;
-            //         const label = context.dataset.label;
-            //         return `${label}: ฿${Number(value).toLocaleString()}`;
-            //       },
-            //       afterBody: function(context: any) {
-            //         // Calculate total income for each crop in the tooltip
-            //         const cropTotals: { [crop: string]: { expense: number, profit: number } } = {};
-                    
-            //         context.forEach((item: any) => {
-            //           const [cropName, type] = item.dataset.label.split(' - ');
-            //           if (!cropTotals[cropName]) {
-            //             cropTotals[cropName] = { expense: 0, profit: 0 };
-            //           }
-            //           if (type === 'Expenses') {
-            //             cropTotals[cropName].expense = item.parsed.y;
-            //           } else if (type === 'Profit') {
-            //             cropTotals[cropName].profit = item.parsed.y;
-            //           }
-            //         });
+              //   tooltip: {
+              //     mode: 'index',
+              //     intersect: true,
+              //     callbacks: {
+              //       title: function(context: any) {
+              //         return `Year: ${context[0].label}`;
+              //       },
+              //       label: function(context: any) {
+              //         const value = context.parsed.y;
+              //         const label = context.dataset.label;
+              //         return `${label}: ฿${Number(value).toLocaleString()}`;
+              //       },
+              //       afterBody: function(context: any) {
+              //         // Calculate total income for each crop in the tooltip
+              //         const cropTotals: { [crop: string]: { expense: number, profit: number } } = {};
 
-            //         const summaries: string[] = [];
-            //         Object.entries(cropTotals).forEach(([cropName, totals]) => {
-            //           const totalIncome = totals.expense + totals.profit;
-            //           if (totalIncome > 0) {
-            //             summaries.push(`${cropName} Total Income: ฿${totalIncome.toLocaleString()}`);
-            //           }
-            //         });
-                    
-            //         return summaries;
-            //       },
-            //     },
-            //   },
+              //         context.forEach((item: any) => {
+              //           const [cropName, type] = item.dataset.label.split(' - ');
+              //           if (!cropTotals[cropName]) {
+              //             cropTotals[cropName] = { expense: 0, profit: 0 };
+              //           }
+              //           if (type === 'Expenses') {
+              //             cropTotals[cropName].expense = item.parsed.y;
+              //           } else if (type === 'Profit') {
+              //             cropTotals[cropName].profit = item.parsed.y;
+              //           }
+              //         });
+
+              //         const summaries: string[] = [];
+              //         Object.entries(cropTotals).forEach(([cropName, totals]) => {
+              //           const totalIncome = totals.expense + totals.profit;
+              //           if (totalIncome > 0) {
+              //             summaries.push(`${cropName} Total Income: ฿${totalIncome.toLocaleString()}`);
+              //           }
+              //         });
+
+              //         return summaries;
+              //       },
+              //     },
+              //   },
             },
             scales: {
               x: {
                 stacked: true,
                 title: {
                   display: true,
-                  text: 'Year',
+                  text: "Year",
                   font: {
                     size: 14,
-                    weight: 'bold',
+                    weight: "bold",
                   },
                 },
               },
@@ -213,23 +225,24 @@ const ProfitStackChart: React.FC<IncomeBreakdownChartProps> = ({
                 beginAtZero: true,
                 title: {
                   display: true,
-                  text: 'Amount (฿)',
+                  text: "Amount (฿)",
                   font: {
                     size: 14,
-                    weight: 'bold',
+                    weight: "bold",
                   },
                 },
                 ticks: {
-                  callback: (value: any) => `฿${Number(value).toLocaleString()}`,
+                  callback: (value: any) =>
+                    `฿${Number(value).toLocaleString()}`,
                 },
                 grid: {
-                  color: 'rgba(0, 0, 0, 0.1)',
+                  color: "rgba(0, 0, 0, 0.1)",
                 },
               },
             },
             animation: {
               duration: 1000,
-              easing: 'easeInOutQuart',
+              easing: "easeInOutQuart",
             },
           },
         });
