@@ -161,11 +161,7 @@ const DashboardPage = () => {
     return filtered;
   }, [expenses, selectedYear, isAllYears, selectedCropId]);
 
-  const chartData = processChartData(filteredIncome, filteredExpenses);
-  const totalIncome = filteredIncome.reduce(
-    (acc, curr) => acc + curr.total,
-    0
-  );
+  const totalIncome = filteredIncome.reduce((acc, curr) => acc + curr.sub_total, 0);
   const totalExpenses = filteredExpenses.reduce(
     (acc, curr) => acc + curr.total,
     0
@@ -222,7 +218,7 @@ const DashboardPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              ฿{totalIncome.toFixed(2)}
+              ฿{totalIncome.toLocaleString("en-US")}
             </div>
             <p className="text-xs text-muted-foreground">
               From {income.length} transactions
@@ -239,7 +235,7 @@ const DashboardPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              ฿{totalExpenses.toFixed(2)}
+              ฿{totalExpenses.toLocaleString("en-US")}
             </div>
             <p className="text-xs text-muted-foreground">
               From {expenses.length} transactions
@@ -260,7 +256,7 @@ const DashboardPage = () => {
                   : "text-red-600"
               }`}
             >
-              ฿{(totalIncome - totalExpenses).toFixed(2)}
+              ฿{(totalIncome - totalExpenses).toLocaleString("en-US")}
             </div>
             <p
               className={`text-xs ${
@@ -303,7 +299,7 @@ const DashboardPage = () => {
                     },
                     tooltip: {
                       callbacks: {
-                        label: (context) => `$${context.parsed.y.toFixed(2)}`,
+                        label: (context) => `$${context.parsed.y}`,
                       },
                     },
                   },
@@ -312,12 +308,15 @@ const DashboardPage = () => {
             </div>
           </CardContent>
         </Card> */}
-         <Card>
+        <Card>
           <CardHeader>
             <CardTitle>Profit by Crop and Year</CardTitle>
           </CardHeader>
           <CardContent>
-            <ProfitStackChart expenses={filteredExpenses} income={filteredIncome}></ProfitStackChart>
+            <ProfitStackChart
+              expenses={filteredExpenses}
+              income={filteredIncome}
+            ></ProfitStackChart>
           </CardContent>
         </Card>
         {/* Expense Treemap */}
@@ -336,6 +335,14 @@ const DashboardPage = () => {
           </CardHeader>
           <CardContent>
             <PriceAmountLineChart filteredIncome={filteredIncome} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Crop Productivity</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CropProductivityChart incomeData={filteredIncome} crops={crops} />
           </CardContent>
         </Card>
         {/* Income each year */}
@@ -361,17 +368,7 @@ const DashboardPage = () => {
           />
         </CardContent>
       </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Crop Productivity</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CropProductivityChart
-            incomeData={filteredIncome}
-            crops={crops}
-          />
-        </CardContent>
-      </Card>
+
       <div className="p-5"></div>
     </div>
   );

@@ -254,11 +254,11 @@ const IncomePage = () => {
         </div>
         <div className="text-right">
           <div className="flex items-center gap-1 text-lg font-semibold text-green-600 mb-1">
-            ฿{income.sub_total.toFixed(2)}
+            ฿{income.sub_total.toLocaleString('en-US')}
           </div>
           {linkedExpenses.length > 0 && (
             <div className="text-sm text-muted-foreground">
-              Net: ฿{netIncome.toFixed(2)}
+              Net: ฿{netIncome.toLocaleString('en-US')}
             </div>
           )}
         </div>
@@ -323,7 +323,7 @@ const IncomePage = () => {
               {selectedCropId ? 'Filtered Income:' : 'Total Income:'}
             </span>
             <span className="text-lg font-semibold text-green-600">
-              ฿{filteredIncomeList.reduce((sum, income) => sum + income.sub_total, 0).toFixed(2)}
+              ฿{filteredIncomeList.reduce((sum, income) => sum + income.sub_total, 0).toLocaleString('en-US')}
             </span>
             <span className="text-sm text-muted-foreground">
               ({filteredIncomeList.length} records
@@ -428,7 +428,7 @@ const IncomePage = () => {
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground">
                   {!isManualSubTotal && watchedPrice && watchedAmount 
-                    ? `Auto: ${watchedPrice} × ${watchedAmount} = ${(watchedPrice * watchedAmount).toFixed(2)}`
+                    ? `Auto: ${watchedPrice} × ${watchedAmount} = ${(watchedPrice * watchedAmount).toLocaleString('en-US')}`
                     : 'Manual entry'}
                 </span>
                 {isManualSubTotal && watchedPrice && watchedAmount && (
@@ -465,18 +465,18 @@ const IncomePage = () => {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span>Sub-total:</span>
-                  <span className="font-medium">${watchedSubTotal.toFixed(2)}</span>
+                  <span className="font-medium">฿{watchedSubTotal.toLocaleString('en-US')}</span>
                 </div>
                 {selectedExpenseIds.length > 0 && (
                   <div className="flex justify-between text-red-600">
                     <span>Linked expenses ({selectedExpenseIds.length}):</span>
-                    <span className="font-medium">-${selectedExpensesTotal.toFixed(2)}</span>
+                    <span className="font-medium">-฿{selectedExpensesTotal.toLocaleString('en-US')}</span>
                   </div>
                 )}
                 <div className="flex justify-between font-semibold text-base border-t pt-2">
                   <span>Net Total:</span>
                   <span className={total >= 0 ? 'text-green-600' : 'text-red-600'}>
-                    ${total.toFixed(2)}
+                    ฿{total.toLocaleString('en-US')}
                   </span>
                 </div>
               </div>

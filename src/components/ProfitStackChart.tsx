@@ -27,7 +27,7 @@ const ProfitStackChart: React.FC<IncomeBreakdownChartProps> = ({
       if (!profitsByYearAndCrop[year]) profitsByYearAndCrop[year] = {};
       if (!profitsByYearAndCrop[year][cropName])
         profitsByYearAndCrop[year][cropName] = { income: 0, expense: 0 };
-      profitsByYearAndCrop[year][cropName].income += inc.total;
+      profitsByYearAndCrop[year][cropName].income += inc.sub_total;
     });
 
     // Process expenses

@@ -199,7 +199,7 @@ const ExpensePage = () => {
       </div>
       <div className="text-right">
         <div className="flex items-center gap-1 text-lg font-semibold text-red-600">
-          ฿{expense.total?.toFixed(2)}
+          ฿{expense.total?.toLocaleString('en-US')}
         </div>
       </div>
     </div>
@@ -262,7 +262,7 @@ const ExpensePage = () => {
               {selectedCropId ? 'Filtered Expenses:' : 'Total Expenses:'}
             </span>
             <span className="text-lg font-semibold text-red-600">
-              ฿{filteredExpenses.reduce((sum, expense) => sum + expense.total, 0).toFixed(2)}
+              ฿{filteredExpenses.reduce((sum, expense) => sum + expense.total, 0).toLocaleString('en-US')}
             </span>
             <span className="text-sm text-muted-foreground">
               ({filteredExpenses.length} records

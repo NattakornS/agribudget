@@ -191,6 +191,21 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
                 </div>
 
                 <div>
+                  <Label htmlFor="cost">Cost *</Label>
+                  <Input
+                    id="cost"
+                    type="number"
+                    step="0.01"
+                    placeholder="Enter cost"
+                    {...register("cost", { valueAsNumber: true })}
+                  />
+                  {errors.cost && (
+                    <p className="text-sm text-destructive mt-1">
+                      {errors.cost.message}
+                    </p>
+                  )}
+                </div>
+                <div>
                   <Label htmlFor="amount">Amount *</Label>
                   <Input
                     id="amount"
@@ -205,7 +220,33 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
                     </p>
                   )}
                 </div>
-
+                <div>
+                  <Label htmlFor="unit">Unit *</Label>
+                  <Input
+                    id="unit"
+                    type="text"
+                    placeholder="Enter unit (Optional)"
+                    {...register("unit")}
+                  />
+                  {errors.cost && (
+                    <p className="text-sm text-destructive mt-1">
+                      {errors.unit?.message}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <Label htmlFor="total">Total *</Label>
+                  <Input
+                    id="total"
+                    type="text"
+                    {...register("total")}
+                  />
+                  {errors.cost && (
+                    <p className="text-sm text-destructive mt-1">
+                      {errors.total?.message}
+                    </p>
+                  )}
+                </div>
                 <div>
                   <Label htmlFor="expense_date">Date *</Label>
                   <Input
@@ -353,7 +394,7 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
                               )}
                             </div>
                             <div className="flex items-center gap-1 text-sm font-medium ml-2">
-                              ฿{expense.total?.toFixed(2)}
+                              ฿{expense.total?.toLocaleString("en-US")}
                             </div>
                           </div>
                         </label>
