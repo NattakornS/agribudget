@@ -143,7 +143,8 @@ const IncomePage = () => {
     try {
       const formDataWithExpenses = {
         ...data,
-        linked_expense_ids: selectedExpenseIds
+        linked_expense_ids: selectedExpenseIds,
+        total
       };
       await createIncome(formDataWithExpenses);
       await refreshIncome();
@@ -160,7 +161,8 @@ const IncomePage = () => {
     try {
       const formDataWithExpenses = {
         ...data,
-        linked_expense_ids: selectedExpenseIds
+        linked_expense_ids: selectedExpenseIds,
+        total
       };
       await updateIncome(selectedIncome.id, formDataWithExpenses);
       await refreshIncome();
@@ -198,6 +200,7 @@ const IncomePage = () => {
       setValue('unit', income.unit || '');
       setValue('amount', income.amount); // Default amount
       setValue('sub_total', income.sub_total);
+      setValue('total', income.total);
       setValue('income_date', income.income_date.split('T')[0]);
       setValue('category_name', income.categories?.name || '');
       setValue('detail', income.detail || '');
@@ -248,19 +251,19 @@ const IncomePage = () => {
           )}
           {linkedExpenses.length > 0 && (
             <div className="text-xs text-muted-foreground">
-              Linked to {linkedExpenses.length} expense(s)
+              Linked to {linkedExpenses.length} expense(s) ฿{linkedExpenses.reduce((sum, exp) => sum + exp.amount, 0).toLocaleString('en-US')}
             </div>
           )}
         </div>
         <div className="text-right">
           <div className="flex items-center gap-1 text-lg font-semibold text-green-600 mb-1">
-            ฿{income.sub_total.toLocaleString('en-US')}
+            ฿{income.total.toLocaleString('en-US')}
           </div>
-          {linkedExpenses.length > 0 && (
+          {/* {linkedExpenses.length > 0 && (
             <div className="text-sm text-muted-foreground">
-              Net: ฿{netIncome.toLocaleString('en-US')}
+              Exp: ฿{linkedExpenses.reduce((sum, exp) => sum + exp.amount, 0).toLocaleString('en-US')}
             </div>
-          )}
+          )} */}
         </div>
       </div>
     );
