@@ -221,11 +221,11 @@ const IncomePage = () => {
     return income.expenses || [];
   };
 
-  const calculateNetIncome = (income: Income) => {
-    const linkedExpenses = getLinkedExpenses(income);
-    const linkedExpensesTotal = linkedExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-    return income.sub_total - linkedExpensesTotal;
-  };
+  // const calculateNetIncome = (income: Income) => {
+  //   const linkedExpenses = getLinkedExpenses(income);
+  //   const linkedExpensesTotal = linkedExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+  //   return income.sub_total - linkedExpensesTotal;
+  // };
 
   const renderIncomeItem = (income: Income) => {
     const linkedExpenses = getLinkedExpenses(income);
