@@ -229,7 +229,7 @@ const IncomePage = () => {
 
   const renderIncomeItem = (income: Income) => {
     const linkedExpenses = getLinkedExpenses(income);
-    const netIncome = calculateNetIncome(income);
+    // const netIncome = calculateNetIncome(income);
     
     return (
       <div className="flex justify-between items-start">
