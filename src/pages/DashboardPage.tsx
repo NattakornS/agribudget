@@ -147,6 +147,22 @@ const DashboardPage = () => {
     return filtered;
   }, [expenses, selectedYear, isAllYears, selectedCropId]);
 
+  const filteredFertilizerPlans = useMemo(() => {
+    let filtered = fertilizerPlan;
+    
+    if (!isAllYears) {
+      filtered = filtered.filter(
+        (plan) => new Date(plan.plan_date).getFullYear() === selectedYear
+      );
+    }
+
+    if (selectedCropId) {
+      filtered = filtered.filter((plan) => plan.crop_id === selectedCropId);
+    }
+
+    return filtered;
+  }, [fertilizerPlan, selectedYear, isAllYears, selectedCropId]);
+
   const totalIncome = filteredIncome.reduce((acc, curr) => acc + curr.sub_total, 0);
   const totalExpenses = filteredExpenses.reduce(
     (acc, curr) => acc + curr.total,
@@ -349,7 +365,7 @@ const DashboardPage = () => {
         </CardHeader>
         <CardContent>
           <FertilizerUsageTable
-            fertilizerPlans={fertilizerPlan}
+            fertilizerPlans={filteredFertilizerPlans}
             crops={crops}
           />
         </CardContent>

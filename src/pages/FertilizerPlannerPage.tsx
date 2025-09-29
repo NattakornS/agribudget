@@ -22,6 +22,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar, AlertCircle, CheckCircle2, Clock, PlayCircle } from 'lucide-react';
+import { useCropFilter } from '@/contexts/CropFilterContext';
 
 const planSchema = z.object({
   crop_id: z.string().min(1, 'Please select a crop'),
@@ -44,7 +45,8 @@ const FertilizerPlannerPage = () => {
   const [selectedPlan, setSelectedPlan] = useState<FertilizerPlan | null>(null);
   const [selectedExpenseIds, setSelectedExpenseIds] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
-
+  
+  const { selectedCropId } = useCropFilter();
   const { selectedYear, isAllYears } = useYearFilter();
 
   const defaultValues = {
@@ -69,9 +71,11 @@ const FertilizerPlannerPage = () => {
     if (isAllYears) return plans;
     return plans.filter(plan => {
       const planYear = new Date(plan.plan_date).getFullYear();
-      return planYear === selectedYear;
+      const matchesYear = planYear === selectedYear;
+      const matchesCrop = !selectedCropId || plan.crop_id === selectedCropId;
+      return matchesYear && matchesCrop;
     });
-  }, [plans, selectedYear, isAllYears]);
+  }, [plans, selectedYear, isAllYears,selectedCropId]);
 
   const refreshPlans = async () => {
     try {
@@ -289,9 +293,9 @@ const FertilizerPlannerPage = () => {
 
   const getStatusCounts = () => {
     const counts = {
-      plan: plans.filter(p => p.status === 'plan').length,
-      doing: plans.filter(p => p.status === 'doing').length,
-      complete: plans.filter(p => p.status === 'complete').length
+      plan: filteredPlans.filter(p => p.status === 'plan').length,
+      doing: filteredPlans.filter(p => p.status === 'doing').length,
+      complete: filteredPlans.filter(p => p.status === 'complete').length
     };
     return counts;
   };
