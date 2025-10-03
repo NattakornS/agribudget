@@ -10,7 +10,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { updatePlanStatus } from "@/services/fertilizerService";
-import { cn } from "@/lib/utils";
+import { cn, getDuration } from "@/lib/utils";
 
 interface Column {
   id: string;
@@ -147,7 +147,7 @@ export const KanbanBoard = ({ plans, onStatusUpdate }: KanbanBoardProps) => {
                                 <CardDescription>
                                   {new Date(
                                     plan.plan_date
-                                  ).toLocaleDateString()}
+                                  ).toLocaleDateString()} ({getDuration(plan.plan_date)})
                                 </CardDescription>
                               </CardHeader>
                               <CardContent className="p-4 pt-0">

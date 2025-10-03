@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar, AlertCircle, CheckCircle2, Clock, PlayCircle } from 'lucide-react';
 import { useCropFilter } from '@/contexts/CropFilterContext';
+import { getDuration } from '@/lib/utils';
 
 const planSchema = z.object({
   crop_id: z.string().min(1, 'Please select a crop'),
@@ -241,7 +242,7 @@ const FertilizerPlannerPage = () => {
           </div>
           <div className="flex items-center gap-1 text-sm text-muted-foreground mb-1">
             <Calendar className="h-3 w-3" />
-            {new Date(plan.plan_date).toLocaleDateString()}
+            {new Date(plan.plan_date).toLocaleDateString()} ({getDuration(plan.plan_date)})
           </div>
           {plan.stage && (
             <p className="text-sm text-muted-foreground mb-1">Stage: {plan.stage}</p>

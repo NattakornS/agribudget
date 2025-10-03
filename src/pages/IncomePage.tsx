@@ -157,6 +157,7 @@ const IncomePage = () => {
   };
 
   const handleUpdateIncome = async (data: IncomeFormData) => {
+    
     if (!selectedIncome) return;
     try {
       const formDataWithExpenses = {
@@ -257,7 +258,7 @@ const IncomePage = () => {
         </div>
         <div className="text-right">
           <div className="flex items-center gap-1 text-lg font-semibold text-green-600 mb-1">
-            ฿{income.total.toLocaleString('en-US')}
+            ฿{income.total?.toLocaleString('en-US')}
           </div>
           {/* {linkedExpenses.length > 0 && (
             <div className="text-sm text-muted-foreground">
