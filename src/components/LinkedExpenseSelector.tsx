@@ -1,41 +1,13 @@
+import ExpenseAddDialog from "@/components/ExpenseAddDialog";
 import { useState, useMemo } from "react";
-import type { Expense, ExpenseFormData, Crop } from "@/types";
-import { createExpense } from "@/services/expenseService";
+import type { Expense, Crop } from "@/types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Search, Plus, Calendar, ListChecks, ListTodo } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { Label } from "@/components/ui/label";
 
-const expenseSchema = z.object({
-  crop_id: z.string().min(1, "Please select a crop"),
-  amount: z.number().positive("Amount must be a positive number"),
-  expense_date: z.string().min(1, "Date is required"),
-  category_name: z.string().min(1, "Category is required"),
-  detail: z.string().optional(),
-  cost: z.number().optional(),
-  total: z.number().optional(),
-  unit: z.string().optional(),
-});
 
 interface LinkedExpenseSelectorProps {
   expenses: Expense[];
@@ -55,28 +27,7 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
-  const defaultValues = {
-    expense_date: new Date().toISOString().split("T")[0],
-    amount: 0,
-    cost: 0,
-    total: 0,
-    unit: "",
-    crop_id: "",
-    category_name: "",
-    detail: "",
-  };
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { errors },
-  } = useForm<ExpenseFormData>({
-    // @ts-ignore - Skip type checking for resolver
-    resolver: zodResolver(expenseSchema),
-    defaultValues,
-  });
+  
 
   // Sort expenses by latest date and filter by search query
   const filteredAndSortedExpenses = useMemo(() => {
@@ -108,21 +59,10 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
     }
   };
 
-  const handleAddExpense = async (data: ExpenseFormData) => {
-    try {
-      await createExpense(data);
-      onExpenseAdded();
-      setIsAddDialogOpen(false);
-      reset(defaultValues);
-    } catch (error) {
-      console.error("Error adding expense:", error);
-    }
-  };
+  
 
   const handleSelectAll = () => {
-    const allExpenseIds = filteredAndSortedExpenses.map(
-      (expense) => expense.id
-    );
+    const allExpenseIds = filteredAndSortedExpenses.map((expense) => expense.id);
     onSelectionChange(allExpenseIds);
   };
 
@@ -153,152 +93,20 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
           >
             <ListTodo />
           </Button>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button type="button" variant="outline" size="sm">
-                <Plus className="h-4 w-4 mr-1" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Add New Expense</DialogTitle>
-              </DialogHeader>
-              <form
-                onSubmit={handleSubmit((data: any) => {
-                  return handleAddExpense(data);
-                })}
-                className="space-y-4"
-              >
-                <div>
-                  <Label htmlFor="crop_id">Crop *</Label>
-                  <Select onValueChange={(value) => setValue("crop_id", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a crop" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {crops.map((crop) => (
-                        <SelectItem key={crop.id} value={crop.id}>
-                          {crop.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.crop_id && (
-                    <p className="text-sm text-destructive mt-1">
-                      {errors.crop_id.message}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="cost">Cost *</Label>
-                  <Input
-                    id="cost"
-                    type="number"
-                    step="0.01"
-                    placeholder="Enter cost"
-                    {...register("cost", { valueAsNumber: true })}
-                  />
-                  {errors.cost && (
-                    <p className="text-sm text-destructive mt-1">
-                      {errors.cost.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="amount">Amount *</Label>
-                  <Input
-                    id="amount"
-                    type="number"
-                    step="0.01"
-                    placeholder="Enter amount"
-                    {...register("amount", { valueAsNumber: true })}
-                  />
-                  {errors.amount && (
-                    <p className="text-sm text-destructive mt-1">
-                      {errors.amount.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="unit">Unit *</Label>
-                  <Input
-                    id="unit"
-                    type="text"
-                    placeholder="Enter unit (Optional)"
-                    {...register("unit")}
-                  />
-                  {errors.cost && (
-                    <p className="text-sm text-destructive mt-1">
-                      {errors.unit?.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="total">Total *</Label>
-                  <Input
-                    id="total"
-                    type="text"
-                    {...register("total")}
-                  />
-                  {errors.cost && (
-                    <p className="text-sm text-destructive mt-1">
-                      {errors.total?.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="expense_date">Date *</Label>
-                  <Input
-                    id="expense_date"
-                    type="date"
-                    {...register("expense_date")}
-                  />
-                  {errors.expense_date && (
-                    <p className="text-sm text-destructive mt-1">
-                      {errors.expense_date.message}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="category_name">Category *</Label>
-                  <Input
-                    id="category_name"
-                    type="text"
-                    placeholder="Enter category (e.g., Seeds, Fertilizer, Labor)"
-                    {...register("category_name")}
-                  />
-                  {errors.category_name && (
-                    <p className="text-sm text-destructive mt-1">
-                      {errors.category_name.message}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="detail">Details (Optional)</Label>
-                  <Textarea
-                    id="detail"
-                    placeholder="Add any additional details..."
-                    {...register("detail")}
-                    rows={3}
-                  />
-                </div>
-
-                <div className="flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsAddDialogOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit">Add Expense</Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setIsAddDialogOpen(true)}
+          >
+            <Plus className="h-4 w-4 mr-1" />
+          </Button>
+          <ExpenseAddDialog
+            isOpen={isAddDialogOpen}
+            onOpenChange={setIsAddDialogOpen}
+            onExpenseAdded={onExpenseAdded}
+            crops={crops}
+          />
         </div>
       </div>
 
