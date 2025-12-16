@@ -195,10 +195,9 @@ const CropProductivityChart: React.FC<CropProductivityChartProps> = ({
 
                     if (additionalData && productivity > 0) {
                       return [
-                        `${context.dataset.label}`,
-                        `${t('productivity')}: ${productivity.toLocaleString()} ${t('productivityUnit')}`,
-                        `${t('totalAmount')}: ${additionalData.totalAmount.toLocaleString()} kg`,
-                        `${t('area')}: ${additionalData.areaInRai.toLocaleString()} ${t('rai')}`,
+                        `${context.dataset.label}: ${productivity.toLocaleString()}`,
+                        // `${t('totalAmount')}: ${additionalData.totalAmount.toLocaleString()} kg`,
+                        // `${t('area')}: ${additionalData.areaInRai.toLocaleString()} ${t('rai')}`,
                       ];
                     }
                     return `${

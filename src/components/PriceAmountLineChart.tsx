@@ -124,7 +124,7 @@ const PriceAmountLineChart: React.FC<PriceAmountLineChartProps> = ({
                 },
               },
               legend: {
-                position: "top",
+                position: "bottom",
               },
               tooltip: {
                 callbacks: {
