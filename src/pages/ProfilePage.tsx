@@ -1,3 +1,5 @@
+import CropSettings from '@/components/CropSettings';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,10 +25,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
-import CropSettings from '@/components/CropSettings';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 interface UserProfile {
   id: string;
@@ -61,7 +60,6 @@ const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [autoOpenCropModal, setAutoOpenCropModal] = useState(false);
-  const navigate = useNavigate();
   const { register, handleSubmit, reset, formState: { errors } } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
   });

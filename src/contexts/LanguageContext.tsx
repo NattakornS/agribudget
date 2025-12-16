@@ -385,7 +385,6 @@ const translations: Record<string, any> = {
     cost: "ต้นทุน",
     unit: "หน่วย",
     unitOptional: "หน่วย (ไม่จำเป็น)",
-    total: "รวม",
     details: "รายละเอียด",
     detailsOptional: "รายละเอียด (ไม่จำเป็น)",
     enterUnitCost: "กรอกต้นทุนต่อหน่วย",
