@@ -9,6 +9,7 @@ import {
   Tooltip,
 } from "chart.js";
 import type { Expense, Income } from "@/types";
+import { useLanguage } from "@/contexts/LanguageContext";
 // Register Chart.js components
 ChartJS.register(
   CategoryScale,
@@ -27,6 +28,7 @@ const ProfitStackChart: React.FC<IncomeBreakdownChartProps> = ({
   income,
   expenses,
 }) => {
+  const {t} = useLanguage()
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<ChartJS | null>(null);
 
@@ -136,7 +138,7 @@ const ProfitStackChart: React.FC<IncomeBreakdownChartProps> = ({
             plugins: {
               title: {
                 display: true,
-                text: "Income Breakdown: Expenses + Profit by Crop and Year",
+                text: t('breakDownIncomePerYear'),
                 font: {
                   size: 16,
                   weight: "bold",

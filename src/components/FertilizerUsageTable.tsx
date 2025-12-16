@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -7,9 +7,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { Crop, FertilizerPlan } from '@/types';
-
-
+import type { Crop, FertilizerPlan } from "@/types";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface FertilizerUsageTableProps {
   fertilizerPlans: FertilizerPlan[];
@@ -27,10 +26,14 @@ interface FertilizerUsage {
   totalPlans: number;
 }
 
-export const FertilizerUsageTable = ({ fertilizerPlans, crops }: FertilizerUsageTableProps) => {
+export const FertilizerUsageTable = ({
+  fertilizerPlans,
+  crops,
+}: FertilizerUsageTableProps) => {
+  const {t} = useLanguage()
   const fertilizerData = useMemo(() => {
-    const cropsMap = new Map(crops.map(crop => [crop.id, crop]));
-    
+    const cropsMap = new Map(crops.map((crop) => [crop.id, crop]));
+
     // First group by year and crop
     const usageByYearAndCrop = fertilizerPlans.reduce((acc, plan) => {
       const year = new Date(plan.plan_date).getFullYear();
@@ -41,7 +44,7 @@ export const FertilizerUsageTable = ({ fertilizerPlans, crops }: FertilizerUsage
         const crop = cropsMap.get(cropId);
         acc[key] = {
           year,
-          cropName: plan.crops?.name||'',
+          cropName: plan.crops?.name || "",
           totalFertilizer: 0,
           treesAmount: crop?.amount || 0,
           fertilizerPerTree: 0,
@@ -51,17 +54,18 @@ export const FertilizerUsageTable = ({ fertilizerPlans, crops }: FertilizerUsage
         };
       }
 
-      acc[key].totalFertilizer += plan.amount_kg||0;
-      if (!acc[key].fertilizerTypes.includes(plan.fertilizer_type||'')) {
-        acc[key].fertilizerTypes.push(plan.fertilizer_type||'');
+      acc[key].totalFertilizer += plan.amount_kg || 0;
+      if (!acc[key].fertilizerTypes.includes(plan.fertilizer_type || "")) {
+        acc[key].fertilizerTypes.push(plan.fertilizer_type || "");
       }
       acc[key].totalPlans++;
-      if (plan.status === 'complete') {
+      if (plan.status === "complete") {
         acc[key].completedPlans++;
       }
-      acc[key].fertilizerPerTree = acc[key].treesAmount > 0 
-        ? acc[key].totalFertilizer / acc[key].treesAmount 
-        : 0;
+      acc[key].fertilizerPerTree =
+        acc[key].treesAmount > 0
+          ? acc[key].totalFertilizer / acc[key].treesAmount
+          : 0;
 
       return acc;
     }, {} as Record<string, FertilizerUsage>);
@@ -86,13 +90,15 @@ export const FertilizerUsageTable = ({ fertilizerPlans, crops }: FertilizerUsage
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Year</TableHead>
-            <TableHead>Crop</TableHead>
-            <TableHead className="text-right">Trees</TableHead>
-            <TableHead className="text-right">Total Fertilizer</TableHead>
-            <TableHead className="text-right">Fertilizer/Tree</TableHead>
-            <TableHead className="text-right">Progress</TableHead>
-            <TableHead>Fertilizer Types</TableHead>
+            <TableHead>{t("year")}</TableHead>
+            <TableHead>{t("crop")}</TableHead>
+            <TableHead className="text-right">{t("trees")}</TableHead>
+            <TableHead className="text-right">{t("totalFertilizer")}</TableHead>
+            <TableHead className="text-right">
+              {t("fertilizerPerTree")}
+            </TableHead>
+            <TableHead className="text-right">{t("progress")}</TableHead>
+            <TableHead>{t("fertilizerTypes")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -100,7 +106,9 @@ export const FertilizerUsageTable = ({ fertilizerPlans, crops }: FertilizerUsage
             <TableRow key={`${usage.year}-${usage.cropName}`}>
               <TableCell>{usage.year}</TableCell>
               <TableCell>{usage.cropName}</TableCell>
-              <TableCell className="text-right">{usage.treesAmount.toLocaleString()}</TableCell>
+              <TableCell className="text-right">
+                {usage.treesAmount.toLocaleString()}
+              </TableCell>
               <TableCell className="text-right">
                 {usage.totalFertilizer.toLocaleString()} kg
               </TableCell>
@@ -110,9 +118,7 @@ export const FertilizerUsageTable = ({ fertilizerPlans, crops }: FertilizerUsage
               <TableCell className="text-right">
                 {usage.completedPlans}/{usage.totalPlans} plans
               </TableCell>
-              <TableCell>
-                {usage.fertilizerTypes.join(', ')}
-              </TableCell>
+              <TableCell>{usage.fertilizerTypes.join(", ")}</TableCell>
             </TableRow>
           ))}
         </TableBody>

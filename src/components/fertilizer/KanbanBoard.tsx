@@ -11,11 +11,12 @@ import {
 } from "@/components/ui/card";
 import { updatePlanStatus } from "@/services/fertilizerService";
 import { cn, getDuration } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Column {
   id: string;
   title: string;
-  type: "planned" | "in-progress" | "complete";
+  type: "planned" | "doing" | "complete";
   plans: FertilizerPlan[];
 }
 
@@ -28,7 +29,7 @@ const getBackgroundColor = (type: Column["type"]) => {
   switch (type) {
     case "planned":
       return "bg-secondary/20";
-    case "in-progress":
+    case "doing":
       return "bg-blue-500/20";
     case "complete":
       return "bg-green-500/20";
@@ -39,7 +40,7 @@ const getStatusColor = (status: string) => {
   switch (status) {
     case "planned":
       return "bg-secondary text-secondary-foreground";
-    case "in-progress":
+    case "doing":
       return "bg-blue-500 text-white";
     case "complete":
       return "bg-green-500 text-white";
@@ -49,22 +50,24 @@ const getStatusColor = (status: string) => {
 };
 
 export const KanbanBoard = ({ plans, onStatusUpdate }: KanbanBoardProps) => {
+const { t } = useLanguage();
+
   const columns: Column[] = [
     {
       id: "planned",
-      title: "Planned",
+      title: t("status.plan"),
       type: "planned",
       plans: plans.filter((p) => p.status === "plan"),
     },
     {
-      id: "in-progress",
-      title: "In Progress",
-      type: "in-progress",
+      id: "doing",
+      title: t("status.doing"),
+      type: "doing",
       plans: plans.filter((p) => p.status === "doing"),
     },
     {
       id: "complete",
-      title: "Complete",
+      title: t("status.complete"),
       type: "complete",
       plans: plans.filter((p) => p.status === "complete"),
     },
@@ -147,7 +150,8 @@ export const KanbanBoard = ({ plans, onStatusUpdate }: KanbanBoardProps) => {
                                 <CardDescription>
                                   {new Date(
                                     plan.plan_date
-                                  ).toLocaleDateString()} ({getDuration(plan.plan_date)})
+                                  ).toLocaleDateString()}{" "}
+                                  ({getDuration(plan.plan_date)})
                                 </CardDescription>
                               </CardHeader>
                               <CardContent className="p-4 pt-0">
@@ -159,7 +163,7 @@ export const KanbanBoard = ({ plans, onStatusUpdate }: KanbanBoardProps) => {
                                   <Badge
                                     className={getStatusColor(plan.status)}
                                   >
-                                    {plan.status}
+                                    {t(`status.${plan.status}`)}
                                   </Badge>
                                 </div>
                                 {plan.detail && (

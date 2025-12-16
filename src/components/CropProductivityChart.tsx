@@ -9,6 +9,7 @@ import {
   Title,
   Tooltip,
 } from "chart.js";
+import { useLanguage } from "@/contexts/LanguageContext";
 interface CropProductivityChartProps {
   crops: Crop[];
   incomeData: Income[];
@@ -28,6 +29,7 @@ const CropProductivityChart: React.FC<CropProductivityChartProps> = ({
   incomeData,
   selectedYear,
 }) => {
+  const {t} = useLanguage()
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<ChartJS | null>(null);
 
@@ -117,7 +119,7 @@ const CropProductivityChart: React.FC<CropProductivityChartProps> = ({
       });
 
       return {
-        label: `Year ${year}`,
+        label: `${t('year')} ${year}`,
         data,
         backgroundColor: color.bg,
         borderColor: color.border,
@@ -163,7 +165,7 @@ const CropProductivityChart: React.FC<CropProductivityChartProps> = ({
             plugins: {
               title: {
                 display: true,
-                text: "Crop Productivity Analysis (kg per rai per year)",
+                text: t('cropProductivityAnalysis'),
                 font: {
                   size: 18,
                   weight: "bold",
@@ -186,7 +188,7 @@ const CropProductivityChart: React.FC<CropProductivityChartProps> = ({
                   },
                   label: function (context: any) {
                     const cropName = context.label;
-                    const year = context.dataset.label.replace("Year ", "");
+                    const year = context.dataset.label.replace(`${t('year')} `, "");
                     const productivity = context.parsed.y;
                     const key = `${cropName}-${year}`;
                     const additionalData = chartData.tooltipData[key];
@@ -194,14 +196,14 @@ const CropProductivityChart: React.FC<CropProductivityChartProps> = ({
                     if (additionalData && productivity > 0) {
                       return [
                         `${context.dataset.label}`,
-                        `Productivity: ${productivity.toLocaleString()} kg/rai/year`,
-                        `Total Amount: ${additionalData.totalAmount.toLocaleString()} kg`,
-                        `Area: ${additionalData.areaInRai.toLocaleString()} rai`,
+                        `${t('productivity')}: ${productivity.toLocaleString()} ${t('productivityUnit')}`,
+                        `${t('totalAmount')}: ${additionalData.totalAmount.toLocaleString()} kg`,
+                        `${t('area')}: ${additionalData.areaInRai.toLocaleString()} ${t('rai')}`,
                       ];
                     }
                     return `${
                       context.dataset.label
-                    }: ${productivity.toLocaleString()} kg/rai/year`;
+                    }: ${productivity.toLocaleString()} ${t('productiviityUnit')}`;
                   },
                 },
                 displayColors: true,
@@ -220,7 +222,7 @@ const CropProductivityChart: React.FC<CropProductivityChartProps> = ({
                 display: true,
                 title: {
                   display: true,
-                  text: "Crops",
+                  text: t('crops'),
                   font: {
                     size: 14,
                     weight: "bold",
@@ -242,7 +244,7 @@ const CropProductivityChart: React.FC<CropProductivityChartProps> = ({
                 display: true,
                 title: {
                   display: true,
-                  text: "Productivity (kg/rai/year)",
+                  text: `${t('productivity')} (${t('productivityUnit')})`,
                   font: {
                     size: 14,
                     weight: "bold",
@@ -285,9 +287,9 @@ const CropProductivityChart: React.FC<CropProductivityChartProps> = ({
     return (
       <div className="flex items-center justify-center h-[500px] bg-gray-50 rounded-lg">
         <div className="text-center">
-          <p className="text-lg text-gray-600 mb-2">No data available</p>
+          <p className="text-lg text-gray-600 mb-2">{t('noDataAvailable')}</p>
           <p className="text-sm text-gray-500">
-            {crops.length === 0 ? "No crops found" : "No income data found"}
+            {crops.length === 0 ? t('noCropsFound') : t('noIncomeDataFound')}
           </p>
         </div>
       </div>
@@ -299,11 +301,10 @@ const CropProductivityChart: React.FC<CropProductivityChartProps> = ({
       <div className="flex items-center justify-center h-[500px] bg-gray-50 rounded-lg">
         <div className="text-center">
           <p className="text-lg text-gray-600 mb-2">
-            Insufficient data for analysis
+            {t('insufficientData')}
           </p>
           <p className="text-sm text-gray-500">
-            Crops need area data and associated income records to calculate
-            productivity
+            {t('cropsNeedAreaData')}
           </p>
         </div>
       </div>
@@ -314,10 +315,10 @@ const CropProductivityChart: React.FC<CropProductivityChartProps> = ({
     <div className="w-full p-4 bg-white rounded-lg shadow-sm">
       <div className="mb-4">
         <p className="text-sm text-gray-600">
-          Productivity = Total Income Amount (kg) ÷ Area (rai)
+          {t('productivityFormula')}
         </p>
         <p className="text-xs text-gray-500 mt-1">
-          1 rai = 1,600 square meters
+          {t('oneRaiEquals')}
         </p>
       </div>
       <div className="w-full h-[500px] relative">

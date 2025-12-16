@@ -40,7 +40,7 @@ const EditModal: React.FC<EditModalProps> = ({
           >
             Delete
           </Button>
-          <Button onClick={onSave} color='primary' className='text-primary'>
+          <Button onClick={onSave} variant="default" color='bg-primary' className='text-primary'>
             Save
           </Button>
         </DialogFooter>

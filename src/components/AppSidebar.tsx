@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Tractor, DollarSign, Sprout, Settings, LogOut, PersonStanding } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   Sidebar,
   SidebarContent,
@@ -16,17 +17,17 @@ import {
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 
-const navItems = [
-  { to: '/profile', name: 'Profile', icon: PersonStanding },
-  { to: '/', name: 'Dashboard', icon: LayoutDashboard },
-  { to: '/income', name: 'Income', icon: DollarSign },
-  { to: '/expenses', name: 'Expenses', icon: Tractor },
-  { to: '/planner', name: 'Planner', icon: Sprout },
-  { to: '/settings', name: 'Settings', icon: Settings },
-];
-
 export function AppSidebar() {
   const { signOut } = useAuth();
+  const { t } = useLanguage();
+
+  const navItems = [
+    { to: '/profile', name: t('profile'), icon: PersonStanding },
+    { to: '/', name: t('dashboardNav'), icon: LayoutDashboard },
+    { to: '/income', name: t('income'), icon: DollarSign },
+    { to: '/expenses', name: t('expenses'), icon: Tractor },
+    { to: '/planner', name: t('planner'), icon: Sprout },
+  ];
 
   return (
     <Sidebar>
@@ -39,7 +40,7 @@ export function AppSidebar() {
       
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>{t('navigation')}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => (
@@ -73,7 +74,7 @@ export function AppSidebar() {
             className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
           >
             <LogOut className="h-4 w-4" />
-            <span>Logout</span>
+            <span>{t('logout')}</span>
           </Button>
         </div>
       </SidebarFooter>

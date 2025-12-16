@@ -1,6 +1,7 @@
 import { useMemo, useRef, useEffect } from "react";
 import * as Chart from "chart.js";
 import type { Income } from "@/types";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface PriceAmountLineChartProps {
   filteredIncome: Income[];
@@ -18,6 +19,7 @@ Chart.Chart.register(
 const PriceAmountLineChart: React.FC<PriceAmountLineChartProps> = ({
   filteredIncome,
 }) => {
+  const {t} = useLanguage()
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart.Chart | null>(null);
 
@@ -115,7 +117,7 @@ const PriceAmountLineChart: React.FC<PriceAmountLineChartProps> = ({
             plugins: {
               title: {
                 display: true,
-                text: "Income Amount vs Price per Unit Over Time",
+                text: t('incomeVsAmountChart'),
                 font: {
                   size: 16,
                   weight: "bold",

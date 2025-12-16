@@ -19,6 +19,7 @@ import {
 } from "chart.js";
 import { AlertCircle, TrendingDown, TrendingUp } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 
 ChartJS.register(...registerables);
@@ -80,6 +81,7 @@ ChartJS.register(...registerables);
 // };
 
 const DashboardPage = () => {
+  const { t } = useLanguage();
   const [income, setIncome] = useState<Income[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [crops, setCrops] = useState<Crop[]>([]);
@@ -205,9 +207,9 @@ const DashboardPage = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('dashboard')}</h1>
         <p className="text-muted-foreground">
-          Overview of your farm's financial performance
+          {t('overviewOfPerformance')}
         </p>
       </div>
 
@@ -215,7 +217,7 @@ const DashboardPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Income</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalIncome')}</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -231,7 +233,7 @@ const DashboardPage = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Expenses
+              {t('totalExpenses')}
             </CardTitle>
             <TrendingDown className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -247,7 +249,7 @@ const DashboardPage = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Net Profit</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('netProfit')}</CardTitle>
             <div className="h-4 w-4 text-muted-foreground">฿</div>
           </CardHeader>
           <CardContent>
@@ -267,7 +269,7 @@ const DashboardPage = () => {
                   : "text-red-600"
               }`}
             >
-              {totalIncome - totalExpenses >= 0 ? "Profitable" : "Loss"}
+              {totalIncome - totalExpenses >= 0 ? t('profitable') : t('loss')}
             </p>
           </CardContent>
         </Card>
@@ -312,7 +314,7 @@ const DashboardPage = () => {
         </Card> */}
         <Card>
           <CardHeader>
-            <CardTitle>Profit by Crop and Year</CardTitle>
+            <CardTitle>{t('profitByCropAndYear')}</CardTitle>
           </CardHeader>
           <CardContent>
             <ProfitStackChart
@@ -324,7 +326,7 @@ const DashboardPage = () => {
         {/* Expense Treemap */}
         <Card>
           <CardHeader>
-            <CardTitle>Expenses by Category</CardTitle>
+            <CardTitle>{t('expensesByCategory')}</CardTitle>
           </CardHeader>
           <CardContent>
             <ExpensePieChart expenses={filteredExpenses} />
@@ -333,7 +335,7 @@ const DashboardPage = () => {
         {/* Income Price/amount */}
         <Card>
           <CardHeader>
-            <CardTitle>Price/Amount</CardTitle>
+            <CardTitle>{t('priceAmount')}</CardTitle>
           </CardHeader>
           <CardContent>
             <PriceAmountLineChart filteredIncome={filteredIncome} />
@@ -341,7 +343,7 @@ const DashboardPage = () => {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Crop Productivity</CardTitle>
+            <CardTitle>{t('cropProductivity')}</CardTitle>
           </CardHeader>
           <CardContent>
             <CropProductivityChart incomeData={filteredIncome} crops={crops} />
@@ -361,7 +363,7 @@ const DashboardPage = () => {
       {/* Fertilizer Usage Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Fertilizer Usage per Tree</CardTitle>
+          <CardTitle>{t('fertilizerUsagePerTree')}</CardTitle>
         </CardHeader>
         <CardContent>
           <FertilizerUsageTable
