@@ -1,20 +1,19 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import { CropFilterProvider } from './contexts/CropFilterContext';
-import { YearFilterProvider } from './contexts/YearFilterContext';
-import LanguageProvider from './contexts/LanguageContext';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import { CropFilterProvider } from "./contexts/CropFilterContext";
+import { YearFilterProvider } from "./contexts/YearFilterContext";
+import LanguageProvider from "./contexts/LanguageContext";
 
-import DashboardPage from './pages/DashboardPage';
-import IncomePage from './pages/IncomePage';
-import ExpensePage from './pages/ExpensePage';
-import FertilizerPlannerPage from './pages/FertilizerPlannerPage';
-import SettingsPage from './pages/SettingsPage';
-import LoginPage from './pages/LoginPage';
-import ProtectedRoute from './components/ProtectedRoute';
-import Layout from './components/Layout';
-import ProfilePage from './pages/ProfilePage';
-import FirstTimeUserRedirect from './components/FirstTimeUserRedirect';
-import { SpeedInsights } from "@vercel/speed-insights/next"
+import DashboardPage from "./pages/DashboardPage";
+import IncomePage from "./pages/IncomePage";
+import ExpensePage from "./pages/ExpensePage";
+import FertilizerPlannerPage from "./pages/FertilizerPlannerPage";
+import SettingsPage from "./pages/SettingsPage";
+import LoginPage from "./pages/LoginPage";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Layout from "./components/Layout";
+import ProfilePage from "./pages/ProfilePage";
+import FirstTimeUserRedirect from "./components/FirstTimeUserRedirect";
 
 function App() {
   return (
@@ -24,15 +23,17 @@ function App() {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route element={<ProtectedRoute />}>
-              <Route element={
-                <CropFilterProvider>
-                  <YearFilterProvider>
-                    <FirstTimeUserRedirect>
-                      <Layout />
-                    </FirstTimeUserRedirect>
-                  </YearFilterProvider>
-                </CropFilterProvider>
-              }>
+              <Route
+                element={
+                  <CropFilterProvider>
+                    <YearFilterProvider>
+                      <FirstTimeUserRedirect>
+                        <Layout />
+                      </FirstTimeUserRedirect>
+                    </YearFilterProvider>
+                  </CropFilterProvider>
+                }
+              >
                 <Route path="/" element={<DashboardPage />} />
                 <Route path="/income" element={<IncomePage />} />
                 <Route path="/expenses" element={<ExpensePage />} />
@@ -44,7 +45,6 @@ function App() {
           </Routes>
         </BrowserRouter>
       </AuthProvider>
-      <SpeedInsights />
     </LanguageProvider>
   );
 }
