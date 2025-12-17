@@ -14,6 +14,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 import ProfilePage from './pages/ProfilePage';
 import FirstTimeUserRedirect from './components/FirstTimeUserRedirect';
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
           </Routes>
         </BrowserRouter>
       </AuthProvider>
+      <SpeedInsights />
     </LanguageProvider>
   );
 }
