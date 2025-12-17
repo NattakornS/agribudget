@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabaseClient';
-import { FertilizerPlanFormData, PlanStatus } from '@/types';
+import type { FertilizerPlanFormData, PlanStatus } from '@/types';
 
 const PLANNER_TABLE = 'fertilize_planner';
 const JOIN_TABLE = 'fertilize_planner_expenses';
@@ -75,6 +75,56 @@ export const updatePlanStatus = async (id: string, status: PlanStatus) => {
   return data;
 };
 
+
+export const updateFertilizerPlan = async (id: string, formData: FertilizerPlanFormData) => {
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError || !sessionData.session) throw new Error('User not authenticated');
+  const userId = sessionData.session.user.id;
+
+  // 1. Update the main plan data
+  const planData = {
+    crop_id: formData.crop_id,
+    plan_date: formData.plan_date,
+    stage: formData.stage,
+    status: formData.status,
+    detail: formData.detail,
+    fertilizer_type: formData.fertilizer_type,
+    amount_kg: formData.amount_kg,
+    updated_at: new Date().toISOString(),
+  };
+
+  // 2. Update the plan record
+  const { data: updatedPlan, error: planError } = await supabase
+    .from(PLANNER_TABLE)
+    .update(planData)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (planError) throw planError;
+
+  // 3. Delete existing expense links
+  const { error: deleteLinksError } = await supabase
+    .from(JOIN_TABLE)
+    .delete()
+    .eq('plan_id', id);
+
+  if (deleteLinksError) throw deleteLinksError;
+
+  // 4. Create new expense links if any
+  if (formData.linked_expense_ids && formData.linked_expense_ids.length > 0) {
+    const links = formData.linked_expense_ids.map(expenseId => ({
+      plan_id: id,
+      expense_id: expenseId,
+      user_id: userId,
+    }));
+
+    const { error: linkError } = await supabase.from(JOIN_TABLE).insert(links);
+    if (linkError) throw linkError;
+  }
+
+  return updatedPlan;
+};
 
 export const deleteFertilizerPlan = async (id: string) => {
   const { error } = await supabase

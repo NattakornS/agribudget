@@ -1,28 +1,31 @@
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import CropSettings from '@/components/CropSettings';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  User, 
-  Mail, 
-  Calendar, 
-  Shield, 
-  Edit, 
-  Save, 
-  X, 
-  AlertCircle, 
-  CheckCircle,
-  Settings
-} from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/lib/supabaseClient';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  AlertCircle,
+  Calendar,
+  CheckCircle,
+  Edit,
+  Mail,
+  Save,
+  Settings,
+  Shield,
+  User,
+  X
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 interface UserProfile {
   id: string;
@@ -48,14 +51,15 @@ const profileSchema = z.object({
 type ProfileFormData = z.infer<typeof profileSchema>;
 
 const ProfilePage = () => {
-  const { user, session } = useAuth();
+  const { user } = useAuth();
+  const { t } = useLanguage();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-
+  const [autoOpenCropModal, setAutoOpenCropModal] = useState(false);
   const { register, handleSubmit, reset, formState: { errors } } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
   });
@@ -80,6 +84,13 @@ const ProfilePage = () => {
         farm_name: user.user_metadata?.farm_name || '',
         location: user.user_metadata?.location || '',
       });
+      
+      // Check if we should auto-open crop modal
+      const shouldOpenModal = sessionStorage.getItem('openCropModal');
+      if (shouldOpenModal === 'true') {
+        setAutoOpenCropModal(true);
+        sessionStorage.removeItem('openCropModal'); // Clear the flag
+      }
       
       setLoading(false);
     }
@@ -118,7 +129,7 @@ const ProfilePage = () => {
         });
       }
 
-      setSuccess('Profile updated successfully!');
+      setSuccess(t('profileUpdatedSuccessfully'));
       setIsEditing(false);
       
       // Clear success message after 3 seconds
@@ -181,7 +192,7 @@ const ProfilePage = () => {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          Unable to load profile information.
+          {t('unableToLoadProfile')}
         </AlertDescription>
       </Alert>
     );
@@ -190,11 +201,14 @@ const ProfilePage = () => {
   return (
     <div className="space-y-6 pb-20">
       {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Profile</h1>
-        <p className="text-muted-foreground">
-          Manage your account information and preferences
-        </p>
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight">{t('profile')}</h1>
+          <p className="text-muted-foreground">
+            {t('manageAccount')}
+          </p>
+        </div>
+        <LanguageSwitcher />
       </div>
 
       {/* Success Alert */}
@@ -221,7 +235,7 @@ const ProfilePage = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
-              Account Information
+              {t('accountInformation')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -232,10 +246,10 @@ const ProfilePage = () => {
               </div>
               <div className="space-y-1">
                 <h3 className="font-medium">
-                  {profile.user_metadata?.full_name || 'No name set'}
+                  {profile.user_metadata?.full_name || t('noNameSet')}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  {profile.user_metadata?.farm_name || 'Farm name not set'}
+                  {profile.user_metadata?.farm_name || t('farmNameNotSet')}
                 </p>
               </div>
             </div>
@@ -244,10 +258,10 @@ const ProfilePage = () => {
             <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
               <Mail className="h-4 w-4 text-muted-foreground" />
               <div className="flex-1">
-                <p className="text-sm font-medium">Email</p>
+                <p className="text-sm font-medium">{t('email')}</p>
                 <p className="text-sm text-muted-foreground">{profile.email}</p>
               </div>
-              <Badge variant="secondary">Verified</Badge>
+              <Badge variant="secondary">{t('verified')}</Badge>
             </div>
 
             {/* Account Details */}
@@ -255,7 +269,7 @@ const ProfilePage = () => {
               <div className="flex items-center gap-3">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-sm font-medium">Member since</p>
+                  <p className="text-sm font-medium">{t('memberSince')}</p>
                   <p className="text-sm text-muted-foreground">
                     {new Date(profile.created_at).toLocaleDateString()}
                   </p>
@@ -265,8 +279,8 @@ const ProfilePage = () => {
               <div className="flex items-center gap-3">
                 <Shield className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-sm font-medium">Account Status</p>
-                  <p className="text-sm text-muted-foreground">Active</p>
+                  <p className="text-sm font-medium">{t('accountStatus')}</p>
+                  <p className="text-sm text-muted-foreground">{t('active')}</p>
                 </div>
               </div>
             </div>
@@ -279,7 +293,7 @@ const ProfilePage = () => {
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <Settings className="h-5 w-5" />
-                Profile Details
+                {t('profileDetails')}
               </CardTitle>
               {!isEditing ? (
                 <Button
@@ -288,7 +302,7 @@ const ProfilePage = () => {
                   onClick={() => setIsEditing(true)}
                 >
                   <Edit className="h-4 w-4 mr-2" />
-                  Edit
+                  {t('edit')}
                 </Button>
               ) : (
                 <div className="flex gap-2">
@@ -299,7 +313,7 @@ const ProfilePage = () => {
                     disabled={saving}
                   >
                     <X className="h-4 w-4 mr-2" />
-                    Cancel
+                    {t('cancel')}
                   </Button>
                   <Button
                     size="sm"
@@ -307,7 +321,7 @@ const ProfilePage = () => {
                     disabled={saving}
                   >
                     <Save className="h-4 w-4 mr-2" />
-                    {saving ? 'Saving...' : 'Save'}
+                    {saving ? t('saving') : t('save')}
                   </Button>
                 </div>
               )}
@@ -316,10 +330,10 @@ const ProfilePage = () => {
           <CardContent>
             <form onSubmit={handleSubmit(handleSaveProfile)} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="full_name">Full Name</Label>
+                <Label htmlFor="full_name">{t('fullName')}</Label>
                 <Input
                   id="full_name"
-                  placeholder="Enter your full name"
+                  placeholder={t('enterYourFullName')}
                   disabled={!isEditing}
                   {...register('full_name')}
                 />
@@ -329,10 +343,10 @@ const ProfilePage = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="farm_name">Farm Name</Label>
+                <Label htmlFor="farm_name">{t('farmName')}</Label>
                 <Input
                   id="farm_name"
-                  placeholder="Enter your farm name"
+                  placeholder={t('enterYourFarmName')}
                   disabled={!isEditing}
                   {...register('farm_name')}
                 />
@@ -342,11 +356,11 @@ const ProfilePage = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
+                <Label htmlFor="phone">{t('phoneNumber')}</Label>
                 <Input
                   id="phone"
                   type="tel"
-                  placeholder="Enter your phone number"
+                  placeholder={t('enterYourPhoneNumber')}
                   disabled={!isEditing}
                   {...register('phone')}
                 />
@@ -356,10 +370,10 @@ const ProfilePage = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
+                <Label htmlFor="location">{t('location')}</Label>
                 <Input
                   id="location"
-                  placeholder="Enter your location"
+                  placeholder={t('enterYourLocation')}
                   disabled={!isEditing}
                   {...register('location')}
                 />
@@ -372,33 +386,39 @@ const ProfilePage = () => {
         </Card>
       </div>
 
+      {/* Crop Settings Section */}
+      <CropSettings 
+        autoOpenModal={autoOpenCropModal} 
+        onModalClose={() => setAutoOpenCropModal(false)} 
+      />
+
       {/* Additional Stats Card */}
       <Card>
         <CardHeader>
-          <CardTitle>Account Overview</CardTitle>
+          <CardTitle>{t('accountOverview')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-green-50 rounded-lg">
-              <p className="text-2xl font-bold text-green-600">Active</p>
-              <p className="text-sm text-green-700">Account Status</p>
+              <p className="text-2xl font-bold text-green-600">{t('active')}</p>
+              <p className="text-sm text-green-700">{t('accountStatus')}</p>
             </div>
             
             <div className="text-center p-4 bg-blue-50 rounded-lg">
               <p className="text-2xl font-bold text-blue-600">
                 {new Date().getFullYear() - new Date(profile.created_at).getFullYear() || '< 1'}
               </p>
-              <p className="text-sm text-blue-700">Years with us</p>
+              <p className="text-sm text-blue-700">{t('yearsWithUs')}</p>
             </div>
             
             <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <p className="text-2xl font-bold text-purple-600">Farmer</p>
-              <p className="text-sm text-purple-700">Account Type</p>
+              <p className="text-2xl font-bold text-purple-600">{t('farmer')}</p>
+              <p className="text-sm text-purple-700">{t('accountType')}</p>
             </div>
             
             <div className="text-center p-4 bg-orange-50 rounded-lg">
-              <p className="text-2xl font-bold text-orange-600">Premium</p>
-              <p className="text-sm text-orange-700">Plan</p>
+              <p className="text-2xl font-bold text-orange-600">{t('premium')}</p>
+              <p className="text-sm text-orange-700">{t('plan')}</p>
             </div>
           </div>
         </CardContent>

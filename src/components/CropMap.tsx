@@ -57,6 +57,7 @@ interface CropMapProps {
   onMapClick?: (lat: number, lng: number) => void;
   selectedLocation?: { lat: number; lng: number } | null;
   showClickInstruction?: boolean;
+  isModal?: boolean;
 }
 
 const CropMap = ({

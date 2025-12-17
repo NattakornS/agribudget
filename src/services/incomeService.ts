@@ -29,7 +29,10 @@ export const getIncome = async () => {
     .order('income_date', { ascending: false });
 
   if (error) throw error;
-  return data;
+  const formData = data.map(el=>{
+    return {...el,expenses:el.income_expenses.map(eel=>eel.expenses)}
+  })
+  return formData;
 };
 
 export const createIncome = async (formData: IncomeFormData) => {
@@ -43,6 +46,10 @@ export const createIncome = async (formData: IncomeFormData) => {
   // 2. Prepare the main income data
   const incomeData = {
     user_id: userId,
+    total: formData.total,
+    price: formData.price,
+    unit: formData.unit,
+    amount: formData.amount,
     crop_id: formData.crop_id,
     sub_total: formData.sub_total,
     detail: formData.detail,

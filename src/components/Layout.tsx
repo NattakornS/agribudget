@@ -1,10 +1,12 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
 import BottomNav from './BottomNav';
 import CropFilter from './CropFilter';
+import { YearFilter } from './YearFilter';
 
 const Layout = () => {
+  const location = useLocation();
   return (
     <SidebarProvider>
       <div className="flex h-screen bg-background w-screen">
@@ -16,23 +18,25 @@ const Layout = () => {
         {/* Main Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Header with crop filter */}
-          <div className="p-4 border-b bg-background">
+            <div className="p-4 border-b bg-background h-[60px]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 {/* Mobile sidebar trigger */}
                 <div className="md:hidden">
                   <SidebarTrigger />
                 </div>
-                <div className="text-md font-semibold md:hidden">AgriBudget</div>
+                {/* <div className="text-md font-semibold md:hidden">AgriBudget</div> */}
                 {/* Desktop title */}
                 <div className="hidden md:block">
                   {/* <h1 className="text-lg font-semibold text-foreground">Farm Management</h1> */}
                 </div>
               </div>
-              {/* Crop Filter */}
-              <div className="flex items-center">
-                <CropFilter />
-              </div>
+              {!['/settings', '/profile'].includes(location.pathname) && (
+                <div className="flex items-center gap-4">
+                  <YearFilter />
+                  <CropFilter />
+                </div>
+              )}
             </div>
           </div>
           

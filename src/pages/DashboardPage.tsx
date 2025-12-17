@@ -1,92 +1,108 @@
-import { useEffect, useState } from 'react';
-import { Bar } from 'react-chartjs-2';
+import CropProductivityChart from "@/components/CropProductivityChart";
+import { ExpensePieChart } from "@/components/ExpensePieChart";
+import { FertilizerUsageTable } from "@/components/FertilizerUsageTable";
+import PriceAmountLineChart from "@/components/PriceAmountLineChart";
+import ProfitStackChart from "@/components/ProfitStackChart";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useCropFilter } from "@/contexts/CropFilterContext";
+import { useYearFilter } from "@/contexts/YearFilterContext";
+import { getCrops } from "@/services/cropService";
+import { getExpenses } from "@/services/expenseService";
+import { getFertilizerPlans } from "@/services/fertilizerService";
+import { getIncome } from "@/services/incomeService";
+import type { Crop, Expense, FertilizerPlan, Income } from "@/types";
 import {
   Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import { getIncome } from '@/services/incomeService';
-import { getExpenses } from '@/services/expenseService';
-import { Income, Expense } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { TrendingUp, TrendingDown, DollarSign, AlertCircle } from 'lucide-react';
+  registerables
+} from "chart.js";
+import { AlertCircle, TrendingDown, TrendingUp } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
 
+ChartJS.register(...registerables);
 // Function to process data for the chart
-const processChartData = (income: Income[], expenses: Expense[]) => {
-  const profitsByYearAndCrop: { [year: string]: { [cropName: string]: { income: number, expense: number } } } = {};
+// const processChartData = (income: Income[], expenses: Expense[]) => {
+//   const profitsByYearAndCrop: {
+//     [year: string]: { [cropName: string]: { income: number; expense: number } };
+//   } = {};
 
-  // Process income
-  income.forEach(inc => {
-    const year = new Date(inc.income_date).getFullYear().toString();
-    const cropName = inc.crops?.name || 'Uncategorized';
-    if (!profitsByYearAndCrop[year]) profitsByYearAndCrop[year] = {};
-    if (!profitsByYearAndCrop[year][cropName]) profitsByYearAndCrop[year][cropName] = { income: 0, expense: 0 };
-    profitsByYearAndCrop[year][cropName].income += inc.sub_total;
-  });
+//   // Process income
+//   income.forEach((inc) => {
+//     const year = new Date(inc.income_date).getFullYear().toString();
+//     const cropName = inc.crops?.name || "Uncategorized";
+//     if (!profitsByYearAndCrop[year]) profitsByYearAndCrop[year] = {};
+//     if (!profitsByYearAndCrop[year][cropName])
+//       profitsByYearAndCrop[year][cropName] = { income: 0, expense: 0 };
+//     profitsByYearAndCrop[year][cropName].income += inc.sub_total;
+//   });
 
-  // Process expenses
-  expenses.forEach(exp => {
-    const year = new Date(exp.expense_date).getFullYear().toString();
-    const cropName = exp.crops?.name || 'Uncategorized';
-    if (!profitsByYearAndCrop[year]) profitsByYearAndCrop[year] = {};
-    if (!profitsByYearAndCrop[year][cropName]) profitsByYearAndCrop[year][cropName] = { income: 0, expense: 0 };
-    profitsByYearAndCrop[year][cropName].expense += exp.amount;
-  });
+//   // Process expenses
+//   expenses.forEach((exp) => {
+//     const year = new Date(exp.expense_date).getFullYear().toString();
+//     const cropName = exp.crops?.name || "Uncategorized";
+//     if (!profitsByYearAndCrop[year]) profitsByYearAndCrop[year] = {};
+//     if (!profitsByYearAndCrop[year][cropName])
+//       profitsByYearAndCrop[year][cropName] = { income: 0, expense: 0 };
+//     profitsByYearAndCrop[year][cropName].expense += exp.amount;
+//   });
 
-  const years = Object.keys(profitsByYearAndCrop).sort();
-  const cropNames = [...new Set([...income.map(i => i.crops?.name), ...expenses.map(e => e.crops?.name)])].filter(Boolean) as string[];
+//   const years = Object.keys(profitsByYearAndCrop).sort();
+//   const cropNames = [
+//     ...new Set([
+//       ...income.map((i) => i.crops?.name),
+//       ...expenses.map((e) => e.crops?.name),
+//     ]),
+//   ].filter(Boolean) as string[];
 
-  const datasets = cropNames.map((cropName, index) => {
-    const data = years.map(year => {
-      const yearData = profitsByYearAndCrop[year];
-      if (yearData && yearData[cropName]) {
-        return yearData[cropName].income - yearData[cropName].expense;
-      }
-      return 0;
-    });
+//   const datasets = cropNames.map((cropName, index) => {
+//     const data = years.map((year) => {
+//       const yearData = profitsByYearAndCrop[year];
+//       if (yearData && yearData[cropName]) {
+//         return yearData[cropName].income - yearData[cropName].expense;
+//       }
+//       return 0;
+//     });
 
-    const colorValue = (index * 50) % 255;
-    return {
-      label: `${cropName} Profit`,
-      data,
-      backgroundColor: `rgba(${colorValue}, 99, 132, 0.5)`,
-    };
-  });
+//     const colorValue = (index * 50) % 255;
+//     return {
+//       label: `${cropName} Profit`,
+//       data,
+//       backgroundColor: `rgba(${colorValue}, 99, 132, 0.5)`,
+//     };
+//   });
 
-  return {
-    labels: years,
-    datasets,
-  };
-};
-
+//   return {
+//     labels: years,
+//     datasets,
+//   };
+// };
 
 const DashboardPage = () => {
+  const { t } = useLanguage();
   const [income, setIncome] = useState<Income[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [crops, setCrops] = useState<Crop[]>([]);
+  const [fertilizerPlan, setfertilizerPlan] = useState<FertilizerPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [incomeData, expensesData] = await Promise.all([getIncome(), getExpenses()]);
-        setIncome(incomeData as Income[]);
-        setExpenses(expensesData as Expense[]);
+        const [incomeData, expensesData, cropsData, fertilizerPlanData] =
+          await Promise.all([
+            getIncome(),
+            getExpenses(),
+            getCrops(),
+            getFertilizerPlans(),
+          ]);
+        setIncome(incomeData as unknown as Income[]);
+        setExpenses(expensesData as unknown as Expense[]);
+        setCrops(cropsData as unknown as Crop[]);
+        setfertilizerPlan(fertilizerPlanData as unknown as FertilizerPlan[]);
         setError(null);
       } catch (err: any) {
         setError(err.message);
@@ -97,9 +113,63 @@ const DashboardPage = () => {
     fetchData();
   }, []);
 
-  const chartData = processChartData(income, expenses);
-  const totalIncome = income.reduce((acc, curr) => acc + curr.sub_total, 0);
-  const totalExpenses = expenses.reduce((acc, curr) => acc + curr.amount, 0);
+  const { selectedYear, isAllYears } = useYearFilter();
+  const { selectedCropId } = useCropFilter();
+
+  // Filter data by year and crop
+  const filteredIncome = useMemo(() => {
+    let filtered = income;
+
+    if (!isAllYears) {
+      filtered = filtered.filter(
+        (inc) => new Date(inc.income_date).getFullYear() === selectedYear
+      );
+    }
+
+    if (selectedCropId) {
+      filtered = filtered.filter((inc) => inc.crop_id === selectedCropId);
+    }
+
+    return filtered;
+  }, [income, selectedYear, isAllYears, selectedCropId]);
+
+  const filteredExpenses = useMemo(() => {
+    let filtered = expenses;
+
+    if (!isAllYears) {
+      filtered = filtered.filter(
+        (exp) => new Date(exp.expense_date).getFullYear() === selectedYear
+      );
+    }
+
+    if (selectedCropId) {
+      filtered = filtered.filter((exp) => exp.crop_id === selectedCropId);
+    }
+
+    return filtered;
+  }, [expenses, selectedYear, isAllYears, selectedCropId]);
+
+  const filteredFertilizerPlans = useMemo(() => {
+    let filtered = fertilizerPlan;
+    
+    if (!isAllYears) {
+      filtered = filtered.filter(
+        (plan) => new Date(plan.plan_date).getFullYear() === selectedYear
+      );
+    }
+
+    if (selectedCropId) {
+      filtered = filtered.filter((plan) => plan.crop_id === selectedCropId);
+    }
+
+    return filtered;
+  }, [fertilizerPlan, selectedYear, isAllYears, selectedCropId]);
+
+  const totalIncome = filteredIncome.reduce((acc, curr) => acc + curr.sub_total, 0);
+  const totalExpenses = filteredExpenses.reduce(
+    (acc, curr) => acc + curr.total,
+    0
+  );
 
   if (loading) {
     return (
@@ -137,9 +207,9 @@ const DashboardPage = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('dashboard')}</h1>
         <p className="text-muted-foreground">
-          Overview of your farm's financial performance
+          {t('overviewOfPerformance')}
         </p>
       </div>
 
@@ -147,95 +217,164 @@ const DashboardPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Income</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalIncome')}</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              ${totalIncome.toFixed(2)}
+              ฿{totalIncome.toLocaleString("en-US")}
             </div>
             <p className="text-xs text-muted-foreground">
               From {income.length} transactions
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t('totalExpenses')}
+            </CardTitle>
             <TrendingDown className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              ${totalExpenses.toFixed(2)}
+              ฿{totalExpenses.toLocaleString("en-US")}
             </div>
             <p className="text-xs text-muted-foreground">
               From {expenses.length} transactions
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Net Profit</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">{t('netProfit')}</CardTitle>
+            <div className="h-4 w-4 text-muted-foreground">฿</div>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${
-              totalIncome - totalExpenses >= 0 
-                ? 'text-green-600' 
-                : 'text-red-600'
-            }`}>
-              ${(totalIncome - totalExpenses).toFixed(2)}
+            <div
+              className={`text-2xl font-bold ${
+                totalIncome - totalExpenses >= 0
+                  ? "text-green-600"
+                  : "text-red-600"
+              }`}
+            >
+              ฿{(totalIncome - totalExpenses).toLocaleString("en-US")}
             </div>
-            <p className={`text-xs ${
-              totalIncome - totalExpenses >= 0 
-                ? 'text-green-600' 
-                : 'text-red-600'
-            }`}>
-              {totalIncome - totalExpenses >= 0 ? 'Profitable' : 'Loss'}
+            <p
+              className={`text-xs ${
+                totalIncome - totalExpenses >= 0
+                  ? "text-green-600"
+                  : "text-red-600"
+              }`}
+            >
+              {totalIncome - totalExpenses >= 0 ? t('profitable') : t('loss')}
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Chart */}
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Profit Chart */}
+        {/* <Card>
+          <CardHeader>
+            <CardTitle>Profit by Crop and Year</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="w-full h-[400px]">
+              <Bar
+                data={chartData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      ticks: {
+                        callback: (value) => `$${value}`,
+                      },
+                    },
+                  },
+                  plugins: {
+                    legend: {
+                      position: "bottom",
+                    },
+                    tooltip: {
+                      callbacks: {
+                        label: (context) => `$${context.parsed.y}`,
+                      },
+                    },
+                  },
+                }}
+              />
+            </div>
+          </CardContent>
+        </Card> */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('profitByCropAndYear')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ProfitStackChart
+              expenses={filteredExpenses}
+              income={filteredIncome}
+            ></ProfitStackChart>
+          </CardContent>
+        </Card>
+        {/* Expense Treemap */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('expensesByCategory')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ExpensePieChart expenses={filteredExpenses} />
+          </CardContent>
+        </Card>
+        {/* Income Price/amount */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('priceAmount')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PriceAmountLineChart filteredIncome={filteredIncome} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('cropProductivity')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CropProductivityChart incomeData={filteredIncome} crops={crops} />
+          </CardContent>
+        </Card>
+        {/* Income each year */}
+        {/* <Card>
+          <CardHeader>
+            <CardTitle>Income Each year</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <YearlyIncomeChart income={filteredIncome} />
+          </CardContent>
+        </Card> */}
+      </div>
+
+      {/* Fertilizer Usage Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Profit by Crop and Year</CardTitle>
+          <CardTitle>{t('fertilizerUsagePerTree')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="w-full h-[400px]">
-            <Bar
-              data={chartData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    ticks: {
-                      callback: (value) => `$${value}`
-                    }
-                  }
-                },
-                plugins: {
-                  legend: {
-                    position: 'bottom'
-                  },
-                  tooltip: {
-                    callbacks: {
-                      label: (context) => `$${context.parsed.y.toFixed(2)}`
-                    }
-                  }
-                }
-              }}
-            />
-          </div>
+          <FertilizerUsageTable
+            fertilizerPlans={filteredFertilizerPlans}
+            crops={crops}
+          />
         </CardContent>
       </Card>
+
+      <div className="p-5"></div>
     </div>
   );
 };
-
 export default DashboardPage;

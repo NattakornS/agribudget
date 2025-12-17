@@ -2,35 +2,38 @@ import { useEffect, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Crop, Expense, ExpenseFormData } from '@/types';
+import type { Crop, Expense, ExpenseFormData } from '@/types';
 import { getCrops } from '@/services/cropService';
 import { getExpenses, createExpense, deleteExpense, updateExpense } from '@/services/expenseService';
 import { useCropFilter } from '@/contexts/CropFilterContext';
+import { useYearFilter } from '@/contexts/YearFilterContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import FloatingActionButton from '@/components/FloatingActionButton';
 import RecordList from '@/components/RecordList';
 import EditModal from '@/components/EditModal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, DollarSign, AlertCircle } from 'lucide-react';
+import { Calendar, AlertCircle } from 'lucide-react';
 
-const expenseSchema = z.object({
-  crop_id: z.string().min(1, 'Please select a crop'),
-  cost: z.number().positive('Cost must be a positive number'),
+const getExpenseSchema = (t: (key: string) => string) => z.object({
+  crop_id: z.string().min(1, t('pleaseSelectCrop')),
+  cost: z.number().positive(t('costMustBePositive')),
   unit: z.string().optional(),
-  amount: z.number().positive('Amount must be a positive number'),
-  total: z.number().positive('Total must be a positive number'),
-  expense_date: z.string().min(1, 'Date is required'),
-  category_name: z.string().min(1, 'Category is required'),
+  amount: z.number().positive(t('amountMustBePositive')),
+  total: z.number().positive(t('totalMustBePositive')),
+  expense_date: z.string().min(1, t('dateRequired')),
+  category_name: z.string().min(1, t('categoryRequired')),
   detail: z.string().optional(),
 });
 
 const ExpensePage = () => {
+  const { t } = useLanguage();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [crops, setCrops] = useState<Crop[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,8 +41,9 @@ const ExpensePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   
-  // Get crop filter from context
+  // Get filters from context
   const { selectedCropId } = useCropFilter();
+  const { selectedYear, isAllYears } = useYearFilter();
 
   const defaultValues: ExpenseFormData = {
     expense_date: new Date().toISOString().split('T')[0],
@@ -53,7 +57,7 @@ const ExpensePage = () => {
   };
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<ExpenseFormData>({
-    resolver: zodResolver(expenseSchema),
+    resolver: zodResolver(getExpenseSchema(t)),
     defaultValues
   });
 
@@ -62,15 +66,17 @@ const ExpensePage = () => {
   // Watch cost and amount for automatic calculation
   const watchedCost = watch('cost');
   const watchedAmount = watch('amount');
-  const watchedTotal = watch('total');
 
-  // Filter expenses list based on selected crop
+
+  // Filter expenses list based on selected crop and year
   const filteredExpenses = useMemo(() => {
-    if (!selectedCropId) {
-      return expenses;
-    }
-    return expenses.filter(expense => expense.crop_id === selectedCropId);
-  }, [expenses, selectedCropId]);
+    return expenses.filter(expense => {
+      const expenseYear = new Date(expense.expense_date).getFullYear();
+      const matchesYear = isAllYears || expenseYear === selectedYear;
+      const matchesCrop = !selectedCropId || expense.crop_id === selectedCropId;
+      return matchesYear && matchesCrop;
+    });
+  }, [expenses, selectedCropId, selectedYear, isAllYears]);
 
   // Auto-calculate total when cost or amount changes, unless manually overridden
   useEffect(() => {
@@ -132,7 +138,7 @@ const ExpensePage = () => {
 
   const handleDeleteExpense = async () => {
     if (!selectedExpense) return;
-    if (window.confirm('Are you sure you want to delete this expense?')) {
+    if (window.confirm(t('areYouSureDeleteExpense'))) {
       try {
         await deleteExpense(selectedExpense.id);
         await refreshExpenses();
@@ -166,23 +172,23 @@ const ExpensePage = () => {
     setIsModalOpen(true);
   };
   
-  const handleDeleteWrapper = async () => {
-    try {
-      await handleDeleteExpense();
-    } catch (error) {
-      // Error is already handled in handleDeleteExpense
-    }
-  };
+  // const handleDeleteWrapper = async () => {
+  //   try {
+  //     await handleDeleteExpense();
+  //   } catch (error) {
+  //     // Error is already handled in handleDeleteExpense
+  //   }
+  // };
 
   const renderExpenseItem = (expense: Expense) => (
     <div className="flex justify-between items-start">
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-2">
           <h3 className="font-semibold text-foreground">
-            {expense.categories?.name || 'Uncategorized'}
+            {expense.categories?.name || t('uncategorized')}
           </h3>
           <Badge variant="secondary">
-            {expense.crops?.name || 'No Crop'}
+            {expense.crops?.name || t('noCrop')}
           </Badge>
         </div>
         <div className="flex items-center gap-1 text-sm text-muted-foreground mb-1">
@@ -195,8 +201,7 @@ const ExpensePage = () => {
       </div>
       <div className="text-right">
         <div className="flex items-center gap-1 text-lg font-semibold text-red-600">
-          <DollarSign className="h-4 w-4" />
-          {expense.total.toFixed(2)}
+          ฿{expense.total?.toLocaleString('en-US')}
         </div>
       </div>
     </div>
@@ -233,9 +238,9 @@ const ExpensePage = () => {
     <div className="space-y-6 pb-20">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Expenses</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('expenses')}</h1>
         <p className="text-muted-foreground">
-          Track and manage your farm expenses
+          {t('trackAndManageExpenses')}
         </p>
       </div>
 
@@ -250,21 +255,21 @@ const ExpensePage = () => {
       {/* Summary Card */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Summary</CardTitle>
+          <CardTitle className="text-lg">{t('summary')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5 text-red-600" />
+            <div className="h-5 w-5 text-red-600">฿</div>
             <span className="text-sm text-muted-foreground">
-              {selectedCropId ? 'Filtered Expenses:' : 'Total Expenses:'}
+              {selectedCropId ? t('filteredExpenses') : t('totalExpenses')}
             </span>
             <span className="text-lg font-semibold text-red-600">
-              ${filteredExpenses.reduce((sum, expense) => sum + expense.total, 0).toFixed(2)}
+              ฿{filteredExpenses.reduce((sum, expense) => sum + expense.total, 0).toLocaleString('en-US')}
             </span>
             <span className="text-sm text-muted-foreground">
-              ({filteredExpenses.length} records
+              ({filteredExpenses.length} {t('records')}
               {selectedCropId && expenses.length !== filteredExpenses.length && 
-                ` of ${expenses.length}`})
+                ` ${t('of')} ${expenses.length}`})
             </span>
           </div>
         </CardContent>
@@ -296,14 +301,14 @@ const ExpensePage = () => {
         onDelete={selectedExpense ? () => {
           void handleDeleteExpense();
         } : () => {}}
-        title={selectedExpense ? 'Edit Expense' : 'Add Expense'}
+        title={selectedExpense ? t('editExpense') : t('addExpense')}
       >
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium">Crop *</label>
+            <label className="text-sm font-medium">{t('selectCrop')} *</label>
             <Select value={watch('crop_id')} onValueChange={(value) => setValue('crop_id', value)}>
               <SelectTrigger>
-                <SelectValue placeholder="Select a crop" />
+                <SelectValue placeholder={t('selectCrop')} />
               </SelectTrigger>
               <SelectContent>
                 {crops.map((crop) => (
@@ -320,11 +325,11 @@ const ExpensePage = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium">Cost *</label>
+              <label className="text-sm font-medium">{t('cost')} *</label>
               <Input
                 type="number"
                 step="0.01"
-                placeholder="Enter unit cost"
+                placeholder={t('enterUnitCost')}
                 {...register('cost', { valueAsNumber: true })}
               />
               {errors.cost && (
@@ -333,11 +338,11 @@ const ExpensePage = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium">Amount *</label>
+              <label className="text-sm font-medium">{t('amount')} *</label>
               <Input
                 type="number"
                 step="0.01"
-                placeholder="Enter amount"
+                placeholder={t('enterAmount')}
                 {...register('amount', { valueAsNumber: true })}
               />
               {errors.amount && (
@@ -347,22 +352,22 @@ const ExpensePage = () => {
           </div>
 
           <div>
-            <label className="text-sm font-medium">Unit (Optional)</label>
+            <label className="text-sm font-medium">{t('unitOptional')}</label>
             <Input
               type="text"
-              placeholder="Enter unit (e.g., kg, liters, bags)"
+              placeholder={t('enterUnit')}
               {...register('unit')}
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-sm font-medium">Total *</label>
+              <label className="text-sm font-medium">{t('total')} *</label>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground">
                   {!isManualTotal && watchedCost && watchedAmount 
-                    ? `Auto: ${watchedCost} × ${watchedAmount} = ${(watchedCost * watchedAmount).toFixed(2)}`
-                    : 'Manual entry'}
+                    ? `${t('auto')}: ${watchedCost} × ${watchedAmount} = ${(watchedCost * watchedAmount).toFixed(2)}`
+                    : t('manualEntry')}
                 </span>
                 {isManualTotal && watchedCost && watchedAmount && (
                   <button
@@ -373,7 +378,7 @@ const ExpensePage = () => {
                     }}
                     className="text-xs text-primary hover:underline"
                   >
-                    Reset to Auto
+                    {t('resetToAuto')}
                   </button>
                 )}
               </div>
@@ -381,7 +386,7 @@ const ExpensePage = () => {
             <Input
               type="number"
               step="0.01"
-              placeholder="Enter total"
+              placeholder={t('enterTotal')}
               {...register('total', { 
                 valueAsNumber: true,
                 onChange: () => setIsManualTotal(true)
@@ -393,7 +398,7 @@ const ExpensePage = () => {
           </div>
 
           <div>
-            <label className="text-sm font-medium">Date *</label>
+            <label className="text-sm font-medium">{t('date')} *</label>
             <Input
               type="date"
               {...register('expense_date')}
@@ -404,10 +409,10 @@ const ExpensePage = () => {
           </div>
 
           <div>
-            <label className="text-sm font-medium">Category *</label>
+            <label className="text-sm font-medium">{t('category')} *</label>
             <Input
               type="text"
-              placeholder="Enter category (e.g., Seeds, Fertilizer, Equipment)"
+              placeholder={t('enterCategory')}
               {...register('category_name')}
             />
             {errors.category_name && (
@@ -416,9 +421,9 @@ const ExpensePage = () => {
           </div>
 
           <div>
-            <label className="text-sm font-medium">Details (Optional)</label>
+            <label className="text-sm font-medium">{t('detailsOptional')}</label>
             <Textarea
-              placeholder="Add any additional details about this expense..."
+              placeholder={t('addDetails')}
               {...register('detail')}
               rows={3}
             />

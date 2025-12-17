@@ -1,6 +1,5 @@
-import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Tractor, DollarSign, Sprout, Settings, LogOut } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import {
   Sidebar,
   SidebarContent,
@@ -13,23 +12,26 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-
-const navItems = [
-  { to: '/', name: 'Dashboard', icon: LayoutDashboard },
-  { to: '/income', name: 'Income', icon: DollarSign },
-  { to: '/expenses', name: 'Expenses', icon: Tractor },
-  { to: '/planner', name: 'Planner', icon: Sprout },
-  { to: '/settings', name: 'Settings', icon: Settings },
-];
+import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { DollarSign, LayoutDashboard, LogOut, PersonStanding, Sprout, Tractor } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
 
 export function AppSidebar() {
   const { signOut } = useAuth();
+  const { t } = useLanguage();
+
+  const navItems = [
+    { to: '/profile', name: t('profile'), icon: PersonStanding },
+    { to: '/', name: t('dashboardNav'), icon: LayoutDashboard },
+    { to: '/income', name: t('income'), icon: DollarSign },
+    { to: '/expenses', name: t('expenses'), icon: Tractor },
+    { to: '/planner', name: t('planner'), icon: Sprout },
+  ];
 
   return (
     <Sidebar>
-      <SidebarHeader className="border-b px-6 py-4">
+      <SidebarHeader className="border-b px-6 py-4 h-[60px]">
         <div className="flex items-center gap-2">
           <Sprout className="h-6 w-6 text-green-600" />
           <h2 className="text-xl font-bold text-foreground">AgriBudget</h2>
@@ -38,7 +40,7 @@ export function AppSidebar() {
       
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>{t('navigation')}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => (
@@ -72,7 +74,7 @@ export function AppSidebar() {
             className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
           >
             <LogOut className="h-4 w-4" />
-            <span>Logout</span>
+            <span>{t('logout')}</span>
           </Button>
         </div>
       </SidebarFooter>

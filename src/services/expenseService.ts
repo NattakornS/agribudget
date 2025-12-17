@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabaseClient';
-import { ExpenseFormData } from '@/types';
+import type { ExpenseFormData } from '@/types';
 import { findOrCreateCategory } from './categoryService';
 
 const TABLE_NAME = 'expenses';
@@ -47,9 +47,10 @@ export const createExpense = async (formData: ExpenseFormData) => {
   const expenseData = {
     user_id: userId,
     crop_id: formData.crop_id,
-    amount: formData.amount, // Use total as the main amount stored in DB
+    amount: formData.amount,
     cost: formData.cost,
     unit: formData.unit,
+    total: formData.total,
     detail: formData.detail,
     expense_date: formData.expense_date,
     category_id: category?.id,
