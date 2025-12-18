@@ -1,3 +1,5 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -14,16 +16,18 @@ import {
 } from '@/components/ui/sidebar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { DollarSign, LayoutDashboard, LogOut, PersonStanding, Sprout, Tractor } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
 
 export function AppSidebar() {
   const { signOut } = useAuth();
   const { t } = useLanguage();
+  const pathname = usePathname();
 
   const navItems = [
     { to: '/profile', name: t('profile'), icon: PersonStanding },
-    { to: '/', name: t('dashboardNav'), icon: LayoutDashboard },
+    { to: '/dashboard', name: t('dashboardNav'), icon: LayoutDashboard },
     { to: '/income', name: t('income'), icon: DollarSign },
     { to: '/expenses', name: t('expenses'), icon: Tractor },
     { to: '/planner', name: t('planner'), icon: Sprout },
@@ -46,17 +50,17 @@ export function AppSidebar() {
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.name}>
                   <SidebarMenuButton asChild>
-                    <NavLink 
-                      to={item.to}
-                      className={({ isActive }) => 
-                        `flex items-center gap-3 w-full ${
-                          isActive ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'hover:bg-sidebar-accent/50'
-                        }`
-                      }
+                    <Link 
+                      href={item.to}
+                      className={`flex items-center gap-3 w-full rounded-md transition-colors ${
+                        pathname === item.to 
+                          ? 'bg-primary text-primary-foreground shadow-sm font-medium' 
+                          : 'hover:bg-sidebar-accent/50 text-sidebar-foreground'
+                      }`}
                     >
                       <item.icon className="h-4 w-4" />
                       <span>{item.name}</span>
-                    </NavLink>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

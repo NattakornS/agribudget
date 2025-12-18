@@ -1,17 +1,17 @@
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import type { DropResult } from "@hello-pangea/dnd";
-import type { FertilizerPlan } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
+  CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
 } from "@/components/ui/card";
-import { updatePlanStatus } from "@/services/fertilizerService";
-import { cn, getDuration } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { cn, getDuration } from "@/lib/utils";
+import { updatePlanStatus } from "@/services/fertilizerService";
+import type { Crop, FertilizerPlan } from "@/types";
+import type { DropResult } from "@hello-pangea/dnd";
+import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 
 interface Column {
   id: string;
@@ -22,7 +22,9 @@ interface Column {
 
 interface KanbanBoardProps {
   plans: FertilizerPlan[];
+  crops: Crop[];
   onStatusUpdate: (plan: FertilizerPlan) => void;
+  onClick: (plan: FertilizerPlan) => void;
 }
 
 const getBackgroundColor = (type: Column["type"]) => {
@@ -49,8 +51,13 @@ const getStatusColor = (status: string) => {
   }
 };
 
-export const KanbanBoard = ({ plans, onStatusUpdate }: KanbanBoardProps) => {
-const { t } = useLanguage();
+export const KanbanBoard = ({
+  plans,
+  crops,
+  onStatusUpdate,
+  onClick
+}: KanbanBoardProps) => {
+  const { t, language } = useLanguage();
 
   const columns: Column[] = [
     {
@@ -98,7 +105,10 @@ const { t } = useLanguage();
       console.error("Failed to update plan status:", error);
     }
   };
-
+  const getCropStartDateByCropId = (crop_id: any) => {
+    const crop = crops.find((el) => el.id === crop_id);
+    return crop?.started_date || new Date().toDateString();
+  };
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="overflow-x-auto pb-4 -mx-6 px-6">
@@ -142,6 +152,7 @@ const { t } = useLanguage();
                                 snapshot.isDragging &&
                                   "ring-2 ring-primary shadow-lg"
                               )}
+                              onClick={()=>onClick(plan)}
                             >
                               <CardHeader className="p-4">
                                 <CardTitle className="text-base">
@@ -151,7 +162,13 @@ const { t } = useLanguage();
                                   {new Date(
                                     plan.plan_date
                                   ).toLocaleDateString()}{" "}
-                                  ({getDuration(plan.plan_date)})
+                                  (
+                                  {getDuration(
+                                    getCropStartDateByCropId(plan.crop_id),
+                                    plan.plan_date,
+                                    language
+                                  )}
+                                  )
                                 </CardDescription>
                               </CardHeader>
                               <CardContent className="p-4 pt-0">

@@ -1,3 +1,5 @@
+'use client';
+
 import CropProductivityChart from "@/components/CropProductivityChart";
 import { ExpensePieChart } from "@/components/ExpensePieChart";
 import { FertilizerUsageTable } from "@/components/FertilizerUsageTable";

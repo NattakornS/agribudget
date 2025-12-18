@@ -38,12 +38,14 @@ export function generateColors(count: number): ColorPalette[] {
 
   return baseColors.slice(0, count);
 }
-export function getDuration(started_date: string) {
+export function getDuration(started_date: string, end_date: string, language: string = 'en') {
   const start = new Date(started_date);
   if (isNaN(start.getTime())) return "";
-
-  const now = new Date();
-  if (start > now) return "0d";
+  let now = new Date();
+  if (end_date) {
+    now = new Date(end_date);
+  }
+  if (start > now) return language === 'th' ? "0วัน" : "0d";
 
   let years = now.getFullYear() - start.getFullYear();
   let months = now.getMonth() - start.getMonth();
@@ -66,10 +68,16 @@ export function getDuration(started_date: string) {
   }
 
   const parts: string[] = [];
-  if (years > 0) parts.push(`${years}y`);
-  if (months > 0) parts.push(`${months}m`);
+  if (years > 0) {
+    parts.push(`${years}${language === 'th' ? 'ปี' : 'y'}`);
+  }
+  if (months > 0) {
+    parts.push(`${months}${language === 'th' ? 'เดือน' : 'm'}`);
+  }
   // always show days (if everything is zero, show "0d")
-  if (days > 0 || parts.length === 0) parts.push(`${days}d`);
+  if (days > 0 || parts.length === 0) {
+    parts.push(`${days}${language === 'th' ? 'วัน' : 'd'}`);
+  }
 
   return parts.join("");
 }

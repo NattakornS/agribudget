@@ -1,6 +1,8 @@
+'use client';
+
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +14,7 @@ import { Sprout, Mail, Lock } from 'lucide-react';
 
 const LoginPage = () => {
   const { signInWithPassword, signUp } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -31,7 +33,7 @@ const LoginPage = () => {
       if (response.error) {
         setError(response.error.message);
       } else if (response.data.session) {
-        navigate('/');
+        router.push('/');
       } else if (isSignUp) {
         setError("Sign up successful! Please check your email to confirm your account.");
       }

@@ -1,3 +1,5 @@
+'use client';
+
 import CropSettings from '@/components/CropSettings';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -23,6 +25,7 @@ import {
   User,
   X
 } from 'lucide-react';
+
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';

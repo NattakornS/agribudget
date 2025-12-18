@@ -91,7 +91,7 @@ const CropMap = ({
         <MapContainer
           center={defaultCenter}
           zoom={defaultZoom}
-          style={{ height: "100%", width: "100%" }}
+          style={{ height: "100%", width: "100%",zIndex: 1 }}
           ref={mapRef}
         >
           <TileLayer

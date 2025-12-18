@@ -1,5 +1,7 @@
+'use client';
+
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { getCrops } from '@/services/cropService';
 import type { Crop } from '@/types';
 
@@ -10,7 +12,7 @@ interface FirstTimeUserRedirectProps {
 const FirstTimeUserRedirect = ({ children }: FirstTimeUserRedirectProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [shouldRedirect, setShouldRedirect] = useState(false);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     const checkUserCrops = async () => {
@@ -22,23 +24,23 @@ const FirstTimeUserRedirect = ({ children }: FirstTimeUserRedirectProps) => {
           setShouldRedirect(true);
           // Store flag in sessionStorage to trigger modal open
           sessionStorage.setItem('openCropModal', 'true');
-          navigate('/profile');
+          router.push('/profile');
         }
       } catch (error) {
         console.error('Error checking user crops:', error);
-        // On error, don't redirect, just show the original page
+        // On error, don't redirect, just show original page
       } finally {
         setIsLoading(false);
       }
     };
 
     // Only check if we're not already on profile page and no modal flag is set
-    if (!window.location.pathname.includes('/profile') && !sessionStorage.getItem('openCropModal')) {
+    if (typeof window !== 'undefined' && !window.location.pathname.includes('/profile') && !sessionStorage.getItem('openCropModal')) {
       checkUserCrops();
     } else {
       setIsLoading(false);
     }
-  }, [navigate]);
+  }, [router]);
 
   if (isLoading) {
     return (

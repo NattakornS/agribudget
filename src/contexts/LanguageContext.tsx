@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 type Language = "en" | "th";
@@ -472,14 +474,22 @@ interface LanguageProviderProps {
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({
   children,
 }) => {
-  const [language, setLanguage] = useState<Language>(() => {
-    const saved = localStorage.getItem("language");
-    return (saved as Language) || "en";
-  });
+  const [language, setLanguage] = useState<Language>("en");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem("language", language);
-  }, [language]);
+    setMounted(true);
+    const saved = localStorage.getItem("language");
+    if (saved) {
+      setLanguage(saved as Language);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      localStorage.setItem("language", language);
+    }
+  }, [language, mounted]);
 
   const getNested = (obj: any, path: string): any => {
     if (!obj) return undefined;

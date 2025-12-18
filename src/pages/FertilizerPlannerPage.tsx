@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useYearFilter } from "@/contexts/YearFilterContext";
@@ -62,7 +64,7 @@ const planSchema = z.object({
 });
 
 const FertilizerPlannerPage = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [plans, setPlans] = useState<FertilizerPlan[]>([]);
   const [crops, setCrops] = useState<Crop[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -99,7 +101,10 @@ const FertilizerPlannerPage = () => {
     resolver: zodResolver(planSchema),
     defaultValues,
   });
-
+  const getCropStartDateByCropId = (crop_id: any) => {
+    const crop = crops.find((el) => el.id === crop_id);
+    return crop?.started_date || new Date().toDateString();
+  };
   // Filter plans based on year
   const filteredPlans = useMemo(() => {
     if (isAllYears) return plans;
@@ -277,7 +282,7 @@ const FertilizerPlannerPage = () => {
           <div className="flex items-center gap-1 text-sm text-muted-foreground mb-1">
             <Calendar className="h-3 w-3" />
             {new Date(plan.plan_date).toLocaleDateString()} (
-            {getDuration(plan.plan_date)})
+            {getDuration(getCropStartDateByCropId(plan.crop_id),plan.plan_date, language)})
           </div>
           {plan.stage && (
             <p className="text-sm text-muted-foreground mb-1">
@@ -459,6 +464,7 @@ const FertilizerPlannerPage = () => {
         ) : (
           <KanbanBoard
             plans={filteredPlans}
+            crops={crops}
             onStatusUpdate={(updatedPlan) => {
               setPlans((prevPlans) =>
                 prevPlans.map((plan) =>
@@ -466,6 +472,7 @@ const FertilizerPlannerPage = () => {
                 )
               );
             }}
+            onClick={handleOpenModal}
           />
         )}
         <FloatingActionButton onClick={() => handleOpenModal()} />
