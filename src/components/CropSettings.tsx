@@ -232,7 +232,7 @@ const CropSettings = ({
 
   return (
     <>
-      <div className="space-y-6">
+      <div className=" grid gap-6 md:grid-cols-2">
         {/* Error Alert */}
         {error && (
           <Alert variant="destructive">
@@ -250,7 +250,7 @@ const CropSettings = ({
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <CropMap crops={crops} height={300} />
+            <CropMap crops={crops} height={400} />
           </CardContent>
         </Card>
 
@@ -271,7 +271,7 @@ const CropSettings = ({
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="max-h-96 overflow-y-auto">
             {crops.length === 0 ? (
               <div className="text-center py-8">
                 <Sprout className="h-12 w-12 mx-auto text-muted-foreground mb-4" />

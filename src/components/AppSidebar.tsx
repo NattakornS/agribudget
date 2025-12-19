@@ -16,6 +16,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { DollarSign, LayoutDashboard, LogOut, PersonStanding, Sprout, Tractor } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
+import ThemeToggle from './ThemeToggle';
 
 export function AppSidebar() {
   const { signOut } = useAuth();
@@ -44,21 +45,17 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => (
-                <SidebarMenuItem key={item.name}>
-                  <SidebarMenuButton asChild>
                     <NavLink 
                       to={item.to}
                       className={({ isActive }) => 
-                        `flex items-center gap-3 w-full ${
-                          isActive ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'hover:bg-sidebar-accent/50'
+                        `flex items-center gap-3 w-full p-2 ${
+                          isActive ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'hover:bg-accent/50'
                         }`
                       }
                     >
                       <item.icon className="h-4 w-4" />
                       <span>{item.name}</span>
                     </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
@@ -67,7 +64,8 @@ export function AppSidebar() {
       
       <SidebarFooter>
         <Separator />
-        <div className="p-4">
+        <div className="p-4 space-y-2">
+          <ThemeToggle />
           <Button
             variant="ghost"
             onClick={signOut}

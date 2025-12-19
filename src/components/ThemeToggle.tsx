@@ -1,0 +1,65 @@
+import React from 'react';
+import { useTheme } from '../contexts/ThemeContext';
+import { Button } from './ui/button';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
+import { Moon, Sun, Monitor } from 'lucide-react';
+
+export const ThemeToggle: React.FC = () => {
+  const { theme, setTheme, resolvedTheme } = useTheme();
+
+  const getIcon = () => {
+    switch (resolvedTheme) {
+      case 'dark':
+        return <Moon className="h-4 w-4" />;
+      case 'light':
+        return <Sun className="h-4 w-4" />;
+      default:
+        return <Monitor className="h-4 w-4" />;
+    }
+  };
+
+  const getLabel = () => {
+    switch (theme) {
+      case 'dark':
+        return 'Dark';
+      case 'light':
+        return 'Light';
+      case 'system':
+        return 'System';
+      default:
+        return 'System';
+    }
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm" className="w-full justify-start">
+          {getIcon()}
+          <span className="ml-2">{getLabel()}</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => setTheme('light')}>
+          <Sun className="mr-2 h-4 w-4" />
+          <span>Light</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme('dark')}>
+          <Moon className="mr-2 h-4 w-4" />
+          <span>Dark</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme('system')}>
+          <Monitor className="mr-2 h-4 w-4" />
+          <span>System</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+export default ThemeToggle;

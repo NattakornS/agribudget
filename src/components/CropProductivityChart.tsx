@@ -173,7 +173,7 @@ const CropProductivityChart: React.FC<CropProductivityChartProps> = ({
                 padding: 20,
               },
               legend: {
-                position: "top",
+                position: "bottom",
                 labels: {
                   padding: 15,
                   font: {
@@ -311,7 +311,7 @@ const CropProductivityChart: React.FC<CropProductivityChartProps> = ({
   }
 
   return (
-    <div className="w-full p-4 bg-white rounded-lg shadow-sm">
+    <div className="w-full p-4  rounded-lg shadow-sm">
       <div className="mb-4">
         <p className="text-sm text-gray-600">
           {t('productivityFormula')}

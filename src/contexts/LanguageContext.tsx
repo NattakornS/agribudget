@@ -450,6 +450,7 @@ const translations: Record<string, any> = {
     filter: "กรอง",
     incomeVsAmountChart: "ราคา และ จำนวนผลผลิต / เวลา",
     breakDownIncomePerYear: "แจงรายละเอียดกำไรรายจ่ายต่อปี",
+    navigation: 'เมนู'
   },
 };
 
