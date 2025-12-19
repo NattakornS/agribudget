@@ -304,6 +304,14 @@ button:focus-visible {
   position: relative;
 }
 
+/* Dark theme support for Leaflet map */
+.dark .leaflet-layer,
+.dark .leaflet-control-zoom-in,
+.dark .leaflet-control-zoom-out,
+.dark .leaflet-control-attribution {
+  filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}
+
 /* Theme transition styles */
 * {
   transition: background-color 0.3s ease, color 0.3s ease,

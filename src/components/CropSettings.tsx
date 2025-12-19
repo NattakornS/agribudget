@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getDuration } from "@/lib/utils";
 import {
   createCrop,
   deleteCrop,
@@ -21,15 +22,14 @@ import {
   Edit,
   Hash,
   MapPin,
+  Plus,
   Ruler,
   Sprout,
-  Trash2,
-  Plus
+  Trash2
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
 const cropSchema = z.object({
   name: z.string().min(1, "Name is required"),
   location: z.string().optional().nullable(),
@@ -58,7 +58,7 @@ const CropSettings = ({
   autoOpenModal = false,
   onModalClose,
 }: CropSettingsProps) => {
-  const { t } = useLanguage();
+  const { t,language } = useLanguage();
   const [crops, setCrops] = useState<Crop[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -317,47 +317,9 @@ const CropSettings = ({
                               </div>
                             )}
                             {crop.started_date && (
-                              <div className="flex items-center gap-1">
+                              <div className="flex gap-1">
                                 <Calendar className="h-3 w-3" />
-                                {(() => {
-                                  const start = new Date(
-                                    crop.started_date as string
-                                  );
-                                  if (isNaN(start.getTime()))
-                                    return t("invalidDate");
-                                  const now = new Date();
-                                  let years =
-                                    now.getFullYear() - start.getFullYear();
-                                  let months =
-                                    now.getMonth() - start.getMonth();
-                                  let days = now.getDate() - start.getDate();
-
-                                  if (days < 0) {
-                                    months -= 1;
-                                    const prevMonth = new Date(
-                                      now.getFullYear(),
-                                      now.getMonth(),
-                                      0
-                                    );
-                                    days += prevMonth.getDate();
-                                  }
-                                  if (months < 0) {
-                                    years -= 1;
-                                    months += 12;
-                                  }
-
-                                  const ageParts: string[] = [];
-                                  if (years > 0)
-                                    ageParts.push(`${years}${t("years")}`);
-                                  if (months > 0)
-                                    ageParts.push(`${months}${t("months")}`);
-                                  if (years === 0 && months === 0)
-                                    ageParts.push(`${days}${t("days")}`);
-
-                                  return `${start.toLocaleDateString()} (${ageParts.join(
-                                    " "
-                                  )})`;
-                                })()}
+                                {new Date(crop.started_date).toLocaleDateString()} ({getDuration(crop.started_date,"",language)})
                               </div>
                             )}
                           </div>

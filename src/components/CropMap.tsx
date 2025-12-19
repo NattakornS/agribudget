@@ -115,21 +115,21 @@ const CropMap = ({
                     <span className="font-semibold">{crop.name}</span>
                   </div>
                   {crop.location && (
-                    <p className="text-sm text-gray-600 mb-1">
+                    <p className="text-sm text-muted-foreground mb-1">
                       Location: {crop.location}
                     </p>
                   )}
                   {crop.area && (
-                    <p className="text-sm text-gray-600 mb-1">
+                    <p className="text-sm text-muted-foreground mb-1">
                       Area: {crop.area} m²
                     </p>
                   )}
                   {crop.amount && (
-                    <p className="text-sm text-gray-600 mb-1">
+                    <p className="text-sm text-muted-foreground mb-1">
                       Quantity: {crop.amount} units
                     </p>
                   )}
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground/70">
                     Lat: {crop.latitude?.toFixed(6)}, Lng:{" "}
                     {crop.longitude?.toFixed(6)}
                   </p>
@@ -157,7 +157,7 @@ const CropMap = ({
               <Popup>
                 <div>
                   <p className="font-semibold">Selected Location</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground/70">
                     Lat: {selectedLocation.lat.toFixed(6)}, Lng:{" "}
                     {selectedLocation.lng.toFixed(6)}
                   </p>
@@ -169,8 +169,8 @@ const CropMap = ({
       </div>
 
       {showClickInstruction && onMapClick && (
-        <div className="p-3 bg-blue-50 border-t text-sm text-blue-700">
-          💡 Click on the map to set the crop location
+        <div className="p-3 bg-blue-50 border-t text-sm text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+          💡 Click on map to set crop location
         </div>
       )}
     </div>

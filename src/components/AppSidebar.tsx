@@ -44,7 +44,8 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => (
-                    <NavLink 
+                    <NavLink
+                      key={item.name}
                       to={item.to}
                       className={({ isActive }) => 
                         `flex items-center gap-3 w-full p-2 ${

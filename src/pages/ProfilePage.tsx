@@ -53,7 +53,7 @@ const profileSchema = z.object({
 type ProfileFormData = z.infer<typeof profileSchema>;
 
 const ProfilePage = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { t } = useLanguage();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -202,7 +202,6 @@ const ProfilePage = () => {
       </Alert>
     );
   }
-  const { signOut } = useAuth();
 
   return (
     <div className="space-y-6 pb-20">

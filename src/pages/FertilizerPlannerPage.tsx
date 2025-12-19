@@ -62,7 +62,7 @@ const planSchema = z.object({
 });
 
 const FertilizerPlannerPage = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [plans, setPlans] = useState<FertilizerPlan[]>([]);
   const [crops, setCrops] = useState<Crop[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -257,7 +257,10 @@ const FertilizerPlannerPage = () => {
         return "bg-gray-500";
     }
   };
-
+  const getCropStartDate = (cropId: string) => {
+    const crop = crops.find((el) => el.id === cropId);
+    return crop?.started_date || new Date().toDateString();
+  };
   const renderPlanItem = (plan: FertilizerPlan) => {
     return (
       <div className="flex justify-between items-start">
@@ -277,7 +280,12 @@ const FertilizerPlannerPage = () => {
           <div className="flex items-center gap-1 text-sm text-muted-foreground mb-1">
             <Calendar className="h-3 w-3" />
             {new Date(plan.plan_date).toLocaleDateString()} (
-            {getDuration(plan.plan_date)})
+            {getDuration(
+              getCropStartDate(plan.crop_id),
+              plan.plan_date,
+              language
+            )}
+            )
           </div>
           {plan.stage && (
             <p className="text-sm text-muted-foreground mb-1">
@@ -458,6 +466,7 @@ const FertilizerPlannerPage = () => {
           />
         ) : (
           <KanbanBoard
+            crops={crops}
             plans={filteredPlans}
             onStatusUpdate={(updatedPlan) => {
               setPlans((prevPlans) =>
@@ -466,6 +475,7 @@ const FertilizerPlannerPage = () => {
                 )
               );
             }}
+            onClick={handleOpenModal}
           />
         )}
         <FloatingActionButton onClick={() => handleOpenModal()} />
