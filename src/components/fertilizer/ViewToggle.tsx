@@ -8,7 +8,7 @@ interface ViewToggleProps {
 
 export const ViewToggle = ({ view, onViewChange }: ViewToggleProps) => {
   return (
-    <div className="flex items-center space-x-2">
+    <div className="grid items-center space-x-2">
       <Button
         variant={view === 'list' ? 'default' : 'ghost'}
         size="sm"
