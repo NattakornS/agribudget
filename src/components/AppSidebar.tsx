@@ -17,6 +17,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { DollarSign, LayoutDashboard, LogOut, PersonStanding, Sprout, Tractor } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export function AppSidebar() {
   const { signOut } = useAuth();
@@ -66,6 +67,7 @@ export function AppSidebar() {
         <Separator />
         <div className="p-4 space-y-2">
           <ThemeToggle />
+          <LanguageSwitcher />
           <Button
             variant="ghost"
             onClick={signOut}

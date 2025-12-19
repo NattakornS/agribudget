@@ -163,21 +163,22 @@ const CropProductivityChart: React.FC<CropProductivityChartProps> = ({
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-              title: {
-                display: true,
-                text: t('cropProductivityAnalysis'),
-                font: {
-                  size: 18,
-                  weight: "bold",
-                },
-                padding: 20,
-              },
+              // title: {
+              //   display: true,
+              //   text: t('cropProductivityAnalysis'),
+              //   font: {
+              //     size: 18,
+              //     weight: "bold",
+              //   },
+              //   padding: 20,
+              // },
               legend: {
                 position: "bottom",
                 labels: {
                   padding: 15,
                   font: {
                     size: 12,
+                    family: "Itim"
                   },
                 },
               },
@@ -313,6 +314,7 @@ const CropProductivityChart: React.FC<CropProductivityChartProps> = ({
   return (
     <div className="w-full p-4  rounded-lg shadow-sm">
       <div className="mb-4">
+        <p>{t('cropProductivityAnalysis')}</p>
         <p className="text-sm text-gray-600">
           {t('productivityFormula')}
         </p>

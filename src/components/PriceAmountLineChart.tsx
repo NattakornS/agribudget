@@ -19,7 +19,7 @@ Chart.Chart.register(
 const PriceAmountLineChart: React.FC<PriceAmountLineChartProps> = ({
   filteredIncome,
 }) => {
-  const {t} = useLanguage()
+  const { t } = useLanguage();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart.Chart | null>(null);
 
@@ -66,7 +66,7 @@ const PriceAmountLineChart: React.FC<PriceAmountLineChartProps> = ({
       labels: dates,
       datasets: [
         {
-          label: `Total Amount (${filteredIncome[0]?.unit || " "})`,
+          label: `${t("totalAmount")} (${filteredIncome[0]?.unit || " "})`,
           data: amounts,
           borderColor: "#22c55e",
           backgroundColor: "rgba(34, 197, 94, 0.1)",
@@ -79,7 +79,7 @@ const PriceAmountLineChart: React.FC<PriceAmountLineChartProps> = ({
           pointBorderWidth: 2,
         },
         {
-          label: "Average Price per Unit (฿)",
+          label: `${t("averagePricePerUnit")}`,
           data: avgPrices,
           borderColor: "#3b82f6",
           backgroundColor: "rgba(59, 130, 246, 0.1)",
@@ -117,14 +117,22 @@ const PriceAmountLineChart: React.FC<PriceAmountLineChartProps> = ({
             plugins: {
               title: {
                 display: true,
-                text: t('incomeVsAmountChart'),
+                text: t("incomeVsAmountChart"),
                 font: {
+                  family: "Itim",
                   size: 16,
                   weight: "bold",
                 },
               },
               legend: {
                 position: "bottom",
+                labels: {
+                  font: {
+                    family: "Itim",
+                    size: 16,
+                    weight: "bold",
+                  },
+                },
               },
               tooltip: {
                 callbacks: {
@@ -154,12 +162,17 @@ const PriceAmountLineChart: React.FC<PriceAmountLineChartProps> = ({
                 position: "left",
                 title: {
                   display: true,
-                  text: "Total Amount (฿)",
+                  text: `${t("totalAmount")} (${
+                    filteredIncome[0]?.unit || " "
+                  })`,
                   color: "#22c55e",
+                  font: {
+                    family: "Itim",
+                  },
                 },
                 ticks: {
                   callback: function (value: any) {
-                    return "฿" + Number(value).toLocaleString();
+                    return Number(value).toLocaleString();
                   },
                   color: "#22c55e",
                 },
@@ -173,12 +186,15 @@ const PriceAmountLineChart: React.FC<PriceAmountLineChartProps> = ({
                 position: "right",
                 title: {
                   display: true,
-                  text: "Average Price per Unit (฿)",
+                  text: `${t("averagePricePerUnit")} (฿)`,
                   color: "#3b82f6",
+                  font: {
+                    family: "Itim",
+                  },
                 },
                 ticks: {
                   callback: function (value: any) {
-                    return "฿" + Number(value).toFixed(2);
+                    return Number(value).toFixed(2);
                   },
                   color: "#3b82f6",
                 },

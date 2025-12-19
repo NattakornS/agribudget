@@ -28,7 +28,7 @@ const ProfitStackChart: React.FC<IncomeBreakdownChartProps> = ({
   income,
   expenses,
 }) => {
-  const {t} = useLanguage()
+  const { t } = useLanguage();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<ChartJS | null>(null);
 
@@ -138,7 +138,7 @@ const ProfitStackChart: React.FC<IncomeBreakdownChartProps> = ({
             plugins: {
               title: {
                 display: true,
-                text: t('breakDownIncomePerYear'),
+                text: t("breakDownIncomePerYear"),
                 font: {
                   size: 16,
                   weight: "bold",
@@ -147,6 +147,9 @@ const ProfitStackChart: React.FC<IncomeBreakdownChartProps> = ({
               legend: {
                 position: "bottom",
                 labels: {
+                  font: {
+                    family: "Itim",
+                  },
                   generateLabels: function (chart: any) {
                     const datasets = chart.data.datasets;
                     const cropNames = [

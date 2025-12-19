@@ -14,7 +14,7 @@ const LanguageSwitcher = () => {
       variant="outline"
       size="sm"
       onClick={toggleLanguage}
-      className="flex items-center gap-2"
+      className="flex items-center gap-2 w-full"
     >
       <Globe className="h-4 w-4" />
       {language === 'en' ? 'TH' : 'EN'}

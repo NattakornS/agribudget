@@ -230,8 +230,12 @@ const translations: Record<string, any> = {
       uncategorized: "Uncategorized",
       noCrop: "No Crop",
     },
+    navigation: "Navigation",
+    averagePricePerUnit: "price per unit",
+    otherSetting: "Other Setting",
   },
   th: {
+    otherSetting: "ตั้งค่าอื่น",
     fertilizerPlanner: {
       title: "แผนการให้ปุ๋ย",
       description: "วางแผนและติดตามการให้ปุ๋ยของคุณ",
@@ -450,7 +454,8 @@ const translations: Record<string, any> = {
     filter: "กรอง",
     incomeVsAmountChart: "ราคา และ จำนวนผลผลิต / เวลา",
     breakDownIncomePerYear: "แจงรายละเอียดกำไรรายจ่ายต่อปี",
-    navigation: 'เมนู'
+    navigation: "เมนู",
+    averagePricePerUnit: "ราคาต่อหน่วย",
   },
 };
 
