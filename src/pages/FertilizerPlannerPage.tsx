@@ -51,6 +51,7 @@ import {
 import { useCropFilter } from "@/contexts/CropFilterContext";
 import { getDuration } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const planSchema = z.object({
   crop_id: z.string().min(1, "Please select a crop"),
@@ -65,6 +66,7 @@ const planSchema = z.object({
 
 const FertilizerPlannerPage = () => {
   const { t, language } = useLanguage();
+  const { showConfirm, ConfirmDialog } = useConfirmDialog();
   const [plans, setPlans] = useState<FertilizerPlan[]>([]);
   const [crops, setCrops] = useState<Crop[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -192,19 +194,23 @@ const FertilizerPlannerPage = () => {
 
   const handleDeletePlan = async () => {
     if (!selectedPlan) return;
-    if (
-      window.confirm("Are you sure you want to delete this fertilizer plan?")
-    ) {
-      try {
-        await deleteFertilizerPlan(selectedPlan.id);
-        await refreshPlans();
-        setIsModalOpen(false);
-        setSelectedPlan(null);
-        setSelectedExpenseIds([]);
-      } catch (err: any) {
-        setError(err.message);
-      }
-    }
+    showConfirm(
+      t("deletePlan"),
+      t("confirmDeletePlan"),
+      async () => {
+        try {
+          await deleteFertilizerPlan(selectedPlan.id);
+          await refreshPlans();
+          setIsModalOpen(false);
+          setSelectedPlan(null);
+          setSelectedExpenseIds([]);
+        } catch (err: any) {
+          setError(err.message);
+        }
+      },
+      t("delete"),
+      t("cancel")
+    );
   };
 
   const handleStatusChange = async (planId: string, newStatus: PlanStatus) => {
@@ -386,7 +392,9 @@ const FertilizerPlannerPage = () => {
   const statusCounts = getStatusCounts();
 
   return (
-    <div className="space-y-6 pb-20">
+    <>
+      <ConfirmDialog />
+      <div className="space-y-6 pb-20">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="space-y-2">
@@ -643,7 +651,8 @@ const FertilizerPlannerPage = () => {
           )}
         </div>
       </EditModal>
-    </div>
+      </div>
+    </>
   );
 };
 

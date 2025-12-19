@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
@@ -199,16 +199,14 @@ const IncomePage = () => {
 
   const handleDeleteIncome = async () => {
     if (!selectedIncome) return;
-    if (window.confirm("Are you sure you want to delete this income record?")) {
-      try {
-        await deleteIncome(selectedIncome.id);
-        await refreshIncome();
-        setIsModalOpen(false);
-        setSelectedIncome(null);
-        setSelectedExpenseIds([]);
-      } catch (err: any) {
-        setError(err.message);
-      }
+    try {
+      await deleteIncome(selectedIncome.id);
+      await refreshIncome();
+      setIsModalOpen(false);
+      setSelectedIncome(null);
+      setSelectedExpenseIds([]);
+    } catch (err: any) {
+      setError(err.message);
     }
   };
 
@@ -325,10 +323,8 @@ const IncomePage = () => {
     <div className="space-y-6 pb-20">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">{t('income')}</h1>
-        <p className="text-muted-foreground">
-          {t('trackAndManageIncome')}
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight">{t("income")}</h1>
+        <p className="text-muted-foreground">{t("trackAndManageIncome")}</p>
       </div>
 
       {/* Error Alert */}
@@ -342,13 +338,15 @@ const IncomePage = () => {
       {/* Summary Card */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">{t('summary')}</CardTitle>
+          <CardTitle className="text-lg">{t("summary")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-green-600" />
             <span className="text-sm text-muted-foreground">
-              {selectedCropId ? `${t('filteredIncome')}:` : `${t('totalIncome')}:`}
+              {selectedCropId
+                ? `${t("filteredIncome")}:`
+                : `${t("totalIncome")}:`}
             </span>
             <span className="text-lg font-semibold text-green-600">
               ฿
@@ -357,7 +355,7 @@ const IncomePage = () => {
                 .toLocaleString("en-US")}
             </span>
             <span className="text-sm text-muted-foreground">
-              ({filteredIncomeList.length} {t('records')}
+              ({filteredIncomeList.length} {t("records")}
               {selectedCropId &&
                 incomeList.length !== filteredIncomeList.length &&
                 ` of ${incomeList.length}`}
@@ -400,11 +398,11 @@ const IncomePage = () => {
               }
             : () => {}
         }
-        title={selectedIncome ? t('editIncome') : t('addIncome')}
+        title={selectedIncome ? t("editIncome") : t("addIncome")}
       >
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium">{t('selectCrop')} *</label>
+            <label className="text-sm font-medium">{t("selectCrop")} *</label>
             <Select
               value={watch("crop_id")}
               onValueChange={(value) => setValue("crop_id", value)}

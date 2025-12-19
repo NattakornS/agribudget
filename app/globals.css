@@ -1,5 +1,4 @@
 @import 'tailwindcss';
-@import url('https://fonts.googleapis.com/css2?family=Itim&display=swap');
 @import "tw-animate-css";
 @import "leaflet/dist/leaflet.css";
 .itim-regular {

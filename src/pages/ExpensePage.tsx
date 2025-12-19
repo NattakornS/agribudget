@@ -140,7 +140,7 @@ const ExpensePage = () => {
 
   const handleDeleteExpense = async () => {
     if (!selectedExpense) return;
-    if (window.confirm(t('areYouSureDeleteExpense'))) {
+    // if (typeof window !== 'undefined' && window.confirm(t('areYouSureDeleteExpense'))) {
       try {
         await deleteExpense(selectedExpense.id);
         await refreshExpenses();
@@ -149,7 +149,7 @@ const ExpensePage = () => {
       } catch (err: any) {
         setError(err.message);
       }
-    }
+    // }
   };
 
   const handleOpenModal = (expense?: Expense) => {

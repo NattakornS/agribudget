@@ -1,29 +1,53 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import type { Crop, CropFormData } from '@/types';
-import { getCrops, createCrop, updateCrop, deleteCrop } from '@/services/cropService';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Trash2, MapPin, Ruler, Hash, Calendar, AlertCircle, Sprout, Edit } from 'lucide-react';
-import EditModal from '@/components/EditModal';
-import FloatingActionButton from '@/components/FloatingActionButton';
-import CropMap from '@/components/CropMap';
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import type { Crop, CropFormData } from "@/types";
+import {
+  getCrops,
+  createCrop,
+  updateCrop,
+  deleteCrop,
+} from "@/services/cropService";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Trash2,
+  MapPin,
+  Ruler,
+  Hash,
+  Calendar,
+  AlertCircle,
+  Sprout,
+  Edit,
+} from "lucide-react";
+import EditModal from "@/components/EditModal";
+import FloatingActionButton from "@/components/FloatingActionButton";
+import CropMap from "@/components/CropMap";
+import { useConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const cropSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
+  name: z.string().min(1, "Name is required"),
   location: z.string().optional().nullable(),
   latitude: z.number().optional().nullable(),
   longitude: z.number().optional().nullable(),
-  area: z.coerce.number().positive('Area must be a positive number').optional().or(z.literal('')),
-  amount: z.coerce.number().int('Amount must be an integer').positive().optional().or(z.literal('')),
+  area: z.coerce
+    .number()
+    .positive("Area must be a positive number")
+    .optional()
+    .or(z.literal("")),
+  amount: z.coerce
+    .number()
+    .int("Amount must be an integer")
+    .positive()
+    .optional()
+    .or(z.literal("")),
   started_date: z.string().optional().nullable(),
 });
 
@@ -33,11 +57,15 @@ const SettingsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCrop, setSelectedCrop] = useState<Crop | null>(null);
-  const [selectedMapLocation, setSelectedMapLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [selectedMapLocation, setSelectedMapLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+  const { showConfirm, ConfirmDialog } = useConfirmDialog();
 
   const defaultValues: CropFormData = {
-    name: '',
-    location: '',
+    name: "",
+    location: "",
     latitude: null,
     longitude: null,
     area: null,
@@ -45,10 +73,16 @@ const SettingsPage = () => {
     started_date: null,
   };
 
-  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<CropFormData>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm<CropFormData>({
     // @ts-ignore - Skip type checking for resolver
     resolver: zodResolver(cropSchema),
-    defaultValues
+    defaultValues,
   });
 
   useEffect(() => {
@@ -116,35 +150,48 @@ const SettingsPage = () => {
 
   const handleDeleteCrop = async () => {
     if (!selectedCrop) return;
-    if (window.confirm('Are you sure you want to delete this crop?')) {
-      try {
-        await deleteCrop(selectedCrop.id);
-        await refreshCrops();
-        setIsModalOpen(false);
-        setSelectedCrop(null);
-      } catch (err: any) {
-        setError(err.message);
-      }
-    }
+    showConfirm(
+      "Delete Crop",
+      "Are you sure you want to delete this crop?",
+      async () => {
+        try {
+          await deleteCrop(selectedCrop.id);
+          await refreshCrops();
+          setIsModalOpen(false);
+          setSelectedCrop(null);
+        } catch (err: any) {
+          setError(err.message);
+        }
+      },
+      "Delete",
+      "Cancel"
+    );
   };
 
   const handleMapClick = (lat: number, lng: number) => {
-    setValue('latitude', lat);
-    setValue('longitude', lng);
+    setValue("latitude", lat);
+    setValue("longitude", lng);
     setSelectedMapLocation({ lat, lng });
   };
 
   const handleOpenModal = (crop?: Crop) => {
     if (crop) {
       setSelectedCrop(crop);
-      setValue('name', crop.name);
-      setValue('location', crop.location || '');
-      setValue('latitude', crop.latitude);
-      setValue('longitude', crop.longitude);
-      setValue('area', crop.area);
-      setValue('amount', crop.amount);
-      setValue('started_date', crop.started_date ? crop.started_date.split('T')[0] : '');
-      setSelectedMapLocation(crop.latitude && crop.longitude ? { lat: crop.latitude, lng: crop.longitude } : null);
+      setValue("name", crop.name);
+      setValue("location", crop.location || "");
+      setValue("latitude", crop.latitude);
+      setValue("longitude", crop.longitude);
+      setValue("area", crop.area);
+      setValue("amount", crop.amount);
+      setValue(
+        "started_date",
+        crop.started_date ? crop.started_date.split("T")[0] : ""
+      );
+      setSelectedMapLocation(
+        crop.latitude && crop.longitude
+          ? { lat: crop.latitude, lng: crop.longitude }
+          : null
+      );
     } else {
       setSelectedCrop(null);
       setSelectedMapLocation(null);
@@ -201,13 +248,9 @@ const SettingsPage = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <CropMap 
-            crops={crops} 
-            height={400}
-          />
+          <CropMap crops={crops} height={400} />
         </CardContent>
       </Card>
-
 
       {/* Existing Crops */}
       <Card>
@@ -222,7 +265,9 @@ const SettingsPage = () => {
             <div className="text-center py-8">
               <Sprout className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground">No crops added yet</p>
-              <p className="text-sm text-muted-foreground">Add your first crop above to get started</p>
+              <p className="text-sm text-muted-foreground">
+                Add your first crop above to get started
+              </p>
             </div>
           ) : (
             <div className="grid gap-4">
@@ -231,7 +276,9 @@ const SettingsPage = () => {
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-lg mb-2">{crop.name}</h3>
+                        <h3 className="font-semibold text-lg mb-2">
+                          {crop.name}
+                        </h3>
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm text-muted-foreground">
                           {crop.location && (
                             <div className="flex items-center gap-1">
@@ -242,7 +289,8 @@ const SettingsPage = () => {
                           {crop.latitude && crop.longitude && (
                             <div className="flex items-center gap-1">
                               <MapPin className="h-3 w-3 text-blue-600" />
-                              {crop.latitude.toFixed(4)}, {crop.longitude.toFixed(4)}
+                              {crop.latitude.toFixed(4)},{" "}
+                              {crop.longitude.toFixed(4)}
                             </div>
                           )}
                           {crop.area && (
@@ -261,29 +309,40 @@ const SettingsPage = () => {
                             <div className="flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
                               {(() => {
-                              const start = new Date(crop.started_date as string);
-                              if (isNaN(start.getTime())) return 'Invalid date';
-                              const now = new Date();
-                              let years = now.getFullYear() - start.getFullYear();
-                              let months = now.getMonth() - start.getMonth();
-                              let days = now.getDate() - start.getDate();
+                                const start = new Date(
+                                  crop.started_date as string
+                                );
+                                if (isNaN(start.getTime()))
+                                  return "Invalid date";
+                                const now = new Date();
+                                let years =
+                                  now.getFullYear() - start.getFullYear();
+                                let months = now.getMonth() - start.getMonth();
+                                let days = now.getDate() - start.getDate();
 
-                              if (days < 0) {
-                                months -= 1;
-                                const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-                                days += prevMonth.getDate();
-                              }
-                              if (months < 0) {
-                                years -= 1;
-                                months += 12;
-                              }
+                                if (days < 0) {
+                                  months -= 1;
+                                  const prevMonth = new Date(
+                                    now.getFullYear(),
+                                    now.getMonth(),
+                                    0
+                                  );
+                                  days += prevMonth.getDate();
+                                }
+                                if (months < 0) {
+                                  years -= 1;
+                                  months += 12;
+                                }
 
-                              const ageParts: string[] = [];
-                              if (years > 0) ageParts.push(`${years}y`);
-                              if (months > 0) ageParts.push(`${months}m`);
-                              if (years === 0 && months === 0) ageParts.push(`${days}d`);
+                                const ageParts: string[] = [];
+                                if (years > 0) ageParts.push(`${years}y`);
+                                if (months > 0) ageParts.push(`${months}m`);
+                                if (years === 0 && months === 0)
+                                  ageParts.push(`${days}d`);
 
-                              return `${start.toLocaleDateString()} (${ageParts.join(' ')})`;
+                                return `${start.toLocaleDateString()} (${ageParts.join(
+                                  " "
+                                )})`;
                               })()}
                             </div>
                           )}
@@ -300,15 +359,21 @@ const SettingsPage = () => {
                         <Button
                           variant="destructive"
                           size="sm"
-                          onClick={async () => {
-                            if (window.confirm('Are you sure you want to delete this crop?')) {
-                              try {
-                                await deleteCrop(crop.id);
-                                await refreshCrops();
-                              } catch (err: any) {
-                                setError(err.message);
-                              }
-                            }
+                          onClick={() => {
+                            showConfirm(
+                              "Delete Crop",
+                              "Are you sure you want to delete this crop?",
+                              async () => {
+                                try {
+                                  await deleteCrop(crop.id);
+                                  await refreshCrops();
+                                } catch (err: any) {
+                                  setError(err.message);
+                                }
+                              },
+                              "Delete",
+                              "Cancel"
+                            );
                           }}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -325,6 +390,8 @@ const SettingsPage = () => {
 
       <FloatingActionButton onClick={() => handleOpenModal()} />
 
+      <ConfirmDialog />
+
       <EditModal
         isOpen={isModalOpen}
         onClose={() => {
@@ -340,7 +407,7 @@ const SettingsPage = () => {
           return handleAddCrop(data as CropFormData);
         })}
         onDelete={selectedCrop ? handleDeleteCrop : () => {}}
-        title={selectedCrop ? 'Edit Crop' : 'Add Crop'}
+        title={selectedCrop ? "Edit Crop" : "Add Crop"}
       >
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -349,19 +416,21 @@ const SettingsPage = () => {
               <Input
                 id="name"
                 placeholder="e.g., Tomatoes, Corn, Apple Trees"
-                {...register('name')}
+                {...register("name")}
               />
               {errors.name && (
-                <p className="text-sm text-destructive">{errors.name.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.name.message}
+                </p>
               )}
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="location">Location Name</Label>
               <Input
                 id="location"
                 placeholder="e.g., North Field, Greenhouse 1"
-                {...register('location')}
+                {...register("location")}
               />
             </div>
           </div>
@@ -380,7 +449,8 @@ const SettingsPage = () => {
             />
             {selectedMapLocation && (
               <div className="text-sm text-muted-foreground mt-2">
-                Selected: {selectedMapLocation.lat.toFixed(6)}, {selectedMapLocation.lng.toFixed(6)}
+                Selected: {selectedMapLocation.lat.toFixed(6)},{" "}
+                {selectedMapLocation.lng.toFixed(6)}
               </div>
             )}
           </div>
@@ -393,38 +463,42 @@ const SettingsPage = () => {
                 type="number"
                 step="0.01"
                 placeholder="1000"
-                {...register('area')}
+                {...register("area")}
               />
               {errors.area && (
-                <p className="text-sm text-destructive">{errors.area.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.area.message}
+                </p>
               )}
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="amount">Quantity</Label>
               <Input
                 id="amount"
                 type="number"
                 placeholder="50 trees, 100 plants"
-                {...register('amount')}
+                {...register("amount")}
               />
               {errors.amount && (
-                <p className="text-sm text-destructive">{errors.amount.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.amount.message}
+                </p>
               )}
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="started_date">Started Date</Label>
               <Input
                 id="started_date"
                 type="date"
-                {...register('started_date')}
+                {...register("started_date")}
               />
             </div>
           </div>
         </div>
       </EditModal>
-      <div className='p-5'></div>
+      <div className="p-5"></div>
     </div>
   );
 };

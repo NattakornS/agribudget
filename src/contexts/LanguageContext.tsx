@@ -480,8 +480,8 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({
   useEffect(() => {
     setMounted(true);
     const saved = localStorage.getItem("language");
-    if (saved) {
-      setLanguage(saved as Language);
+    if (saved && (saved === 'en' || saved === 'th')) {
+      setLanguage(saved);
     }
   }, []);
 

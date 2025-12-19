@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   createCrop,
@@ -24,7 +25,7 @@ import {
   Ruler,
   Sprout,
   Trash2,
-  Plus
+  Plus,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -58,7 +59,10 @@ const CropSettings = ({
   autoOpenModal = false,
   onModalClose,
 }: CropSettingsProps) => {
+  // Prevent server-side rendering issues
+
   const { t } = useLanguage();
+  const { showConfirm, ConfirmDialog } = useConfirmDialog();
   const [crops, setCrops] = useState<Crop[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -163,16 +167,22 @@ const CropSettings = ({
 
   const handleDeleteCrop = async () => {
     if (!selectedCrop) return;
-    if (window.confirm(t("confirmDeleteCrop"))) {
-      try {
-        await deleteCrop(selectedCrop.id);
-        await refreshCrops();
-        setIsModalOpen(false);
-        setSelectedCrop(null);
-      } catch (err: any) {
-        setError(err.message);
-      }
-    }
+    showConfirm(
+      t("deleteCrop"),
+      t("confirmDeleteCrop"),
+      async () => {
+        try {
+          await deleteCrop(selectedCrop.id);
+          await refreshCrops();
+          setIsModalOpen(false);
+          setSelectedCrop(null);
+        } catch (err: any) {
+          setError(err.message);
+        }
+      },
+      t("delete"),
+      t("cancel")
+    );
   };
 
   const handleMapClick = (lat: number, lng: number) => {
@@ -232,6 +242,7 @@ const CropSettings = ({
 
   return (
     <>
+      <ConfirmDialog />
       <div className="space-y-6">
         {/* Error Alert */}
         {error && (
@@ -267,7 +278,8 @@ const CropSettings = ({
                 size="sm"
                 onClick={() => handleOpenModal()}
               >
-                <Plus className="h-4 w-4" />{t("add")}
+                <Plus className="h-4 w-4" />
+                {t("add")}
               </Button>
             </div>
           </CardHeader>
@@ -354,9 +366,7 @@ const CropSettings = ({
                                   if (years === 0 && months === 0)
                                     ageParts.push(`${days}${t("days")}`);
 
-                                  return `${start.toLocaleDateString()} (${ageParts.join(
-                                    " "
-                                  )})`;
+                                  return `${start.toLocaleDateString()} (${ageParts.join(" ")})`;
                                 })()}
                               </div>
                             )}
@@ -373,15 +383,21 @@ const CropSettings = ({
                           <Button
                             variant="destructive"
                             size="sm"
-                            onClick={async () => {
-                              if (window.confirm(t("confirmDeleteCrop"))) {
-                                try {
-                                  await deleteCrop(crop.id);
-                                  await refreshCrops();
-                                } catch (err: any) {
-                                  setError(err.message);
-                                }
-                              }
+                            onClick={() => {
+                              showConfirm(
+                                t("deleteCrop"),
+                                t("confirmDeleteCrop"),
+                                async () => {
+                                  try {
+                                    await deleteCrop(crop.id);
+                                    await refreshCrops();
+                                  } catch (err: any) {
+                                    setError(err.message);
+                                  }
+                                },
+                                t("delete"),
+                                t("cancel")
+                              );
                             }}
                           >
                             <Trash2 className="h-4 w-4" />

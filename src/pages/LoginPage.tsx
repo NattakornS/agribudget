@@ -1,28 +1,33 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabaseClient';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Sprout, Mail, Lock } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Sprout, Mail, Lock } from "lucide-react";
 
 const LoginPage = () => {
   const { signInWithPassword, signUp } = useAuth();
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     try {
       let response;
       if (isSignUp) {
@@ -33,9 +38,11 @@ const LoginPage = () => {
       if (response.error) {
         setError(response.error.message);
       } else if (response.data.session) {
-        router.push('/');
+        router.push("/");
       } else if (isSignUp) {
-        setError("Sign up successful! Please check your email to confirm your account.");
+        setError(
+          "Sign up successful! Please check your email to confirm your account."
+        );
       }
     } catch (err: any) {
       setError(err.message);
@@ -43,20 +50,24 @@ const LoginPage = () => {
   };
 
   const handleGoogleLogin = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin,
-      },
+    useEffect(() => {
+      supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin,
+        },
+      });
     });
   };
 
   const handleFacebookLogin = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'facebook',
-      options: {
-        redirectTo: window.location.origin,
-      },
+    useEffect(() => {
+      supabase.auth.signInWithOAuth({
+        provider: "facebook",
+        options: {
+          redirectTo: window.location.origin,
+        },
+      });
     });
   };
 
@@ -69,16 +80,15 @@ const LoginPage = () => {
             <h1 className="text-2xl font-bold text-foreground">AgriBudget</h1>
           </div>
           <CardTitle className="text-xl">
-            {isSignUp ? 'Create Account' : 'Welcome Back'}
+            {isSignUp ? "Create Account" : "Welcome Back"}
           </CardTitle>
           <CardDescription>
-            {isSignUp 
-              ? 'Create your account to start managing your farm budget' 
-              : 'Sign in to your account to continue'
-            }
+            {isSignUp
+              ? "Create your account to start managing your farm budget"
+              : "Sign in to your account to continue"}
           </CardDescription>
         </CardHeader>
-        
+
         <CardContent className="space-y-4">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
@@ -96,7 +106,7 @@ const LoginPage = () => {
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
@@ -112,48 +122,47 @@ const LoginPage = () => {
                 />
               </div>
             </div>
-            
+
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            
-            <Button type="submit" className="w-full" variant="outline" >
-              {isSignUp ? 'Create Account' : 'Sign In'}
+
+            <Button type="submit" className="w-full" variant="outline">
+              {isSignUp ? "Create Account" : "Sign In"}
             </Button>
           </form>
-          
+
           <div className="text-center">
-            <Button 
-              variant="link" 
+            <Button
+              variant="link"
               onClick={() => setIsSignUp(!isSignUp)}
               className="text-sm"
             >
-              {isSignUp 
-                ? 'Already have an account? Sign in' 
-                : "Don't have an account? Sign up"
-              }
+              {isSignUp
+                ? "Already have an account? Sign in"
+                : "Don't have an account? Sign up"}
             </Button>
           </div>
-          
+
           <Separator className="my-4" />
-          
+
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground text-center mb-3">
               Or continue with
             </p>
-            
+
             <div className="grid grid-cols-2 gap-2">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={handleGoogleLogin}
                 className="w-full"
               >
                 Google
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={handleFacebookLogin}
                 className="w-full"
               >
