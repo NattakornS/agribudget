@@ -19,7 +19,7 @@ const Layout = () => {
         {/* Main Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Header with crop filter */}
-          <div className="p-4 border-b bg-background h-[60px]">
+          <div className="p-4 border-b h-[60px] bg-sidebar-accent">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 {/* Mobile sidebar trigger */}

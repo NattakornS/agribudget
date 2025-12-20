@@ -225,7 +225,7 @@ const DashboardPage = () => {
               ฿{totalIncome.toLocaleString("en-US")}
             </div>
             <p className="text-xs text-muted-foreground">
-              From {income.length} transactions
+              {t('from')} {income.length} {t('items')}
             </p>
           </CardContent>
         </Card>
@@ -242,7 +242,7 @@ const DashboardPage = () => {
               ฿{totalExpenses.toLocaleString("en-US")}
             </div>
             <p className="text-xs text-muted-foreground">
-              From {expenses.length} transactions
+               {t('from')} {expenses.length} {t('items')}
             </p>
           </CardContent>
         </Card>

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Search, Plus, Calendar, ListChecks, ListTodo } from "lucide-react";
 import { Label } from "@/components/ui/label";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 
 interface LinkedExpenseSelectorProps {
@@ -27,7 +28,7 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
-  
+  const {t} = useLanguage()
 
   // Sort expenses by latest date and filter by search query
   const filteredAndSortedExpenses = useMemo(() => {
@@ -73,7 +74,7 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <Label className="text-sm font-medium">Link Expenses (Optional)</Label>
+        <Label className="text-sm font-medium">{t('linkedExpenses')} {t('optional')}</Label>
         <div className="flex items-center gap-2">
           <Button
             type="button"
@@ -127,10 +128,10 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
           {/* Selection Summary */}
           {selectedExpenseIds.length > 0 && (
             <div className="text-sm text-muted-foreground">
-              {selectedExpenseIds.length} expense(s) selected
+              {selectedExpenseIds.length} {t('itemSelected')}
               {selectedExpenseIds.length > 0 && (
                 <span className="ml-2">
-                  (Total: $
+                  ({t('total')}: ฿
                   {expenses
                     .filter((expense) =>
                       selectedExpenseIds.includes(expense.id)

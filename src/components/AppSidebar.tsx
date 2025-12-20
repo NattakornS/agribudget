@@ -30,8 +30,8 @@ export function AppSidebar() {
   ];
 
   return (
-    <Sidebar>
-      <SidebarHeader className="border-b px-6 py-4 h-[60px]">
+    <Sidebar className="bg-sidebar-accent">
+      <SidebarHeader className="border-b px-6 py-4 h-[60px] bg-sidebar-accent">
         <div className="flex items-center gap-2">
           <Sprout className="h-6 w-6 text-green-600" />
           <h2 className="text-xl font-bold text-foreground">AgriBudget</h2>

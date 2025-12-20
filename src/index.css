@@ -76,7 +76,7 @@
   /* Dark theme colors */
   --background: oklch(0.15 0.01 160); /* Deep forest-charcoal */
   --foreground: oklch(0.98 0.01 160);
-  --card: oklch(0.18 0.02 160);
+  --card: oklch(28.925% 0.03765 161.073);
   --card-foreground: oklch(0.98 0.01 160);
   --popover: oklch(0.18 0.02 160);
   --popover-foreground: oklch(0.98 0.01 160);
@@ -326,4 +326,9 @@ body,
 .textarea {
   transition: background-color 0.3s ease, color 0.3s ease,
     border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.bg-card {
+  background-color: var(--card);
+  /* color: var(--accent-foreground); */
 }

@@ -33,21 +33,22 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, TrendingUp, AlertCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-const incomeSchema = z.object({
-  crop_id: z.string().min(1, "Please select a crop"),
-  price: z.number().positive("Price must be a positive number"),
-  unit: z.string().optional(),
-  amount: z.number().positive("Amount must be a positive number"),
-  sub_total: z.number(), //.positive('Sub-total must be a positive number'),
-  total: z.number(), //.positive('Total must be a positive number').optional(),
-  income_date: z.string().min(1, "Date is required"),
-  category_name: z.string().min(1, "Category is required"),
-  detail: z.string().optional(),
-  linked_expense_ids: z.array(z.string()),
-});
+// schema will be created inside component to allow translated error messages
 
 const IncomePage = () => {
   const { t } = useLanguage();
+  const incomeSchema = z.object({
+    crop_id: z.string().min(1, t("pleaseSelectCrop")),
+    price: z.number().positive(t("priceMustBePositive")),
+    unit: z.string().optional(),
+    amount: z.number().positive(t("amountMustBePositive")),
+    sub_total: z.number(),
+    total: z.number(),
+    income_date: z.string().min(1, t("dateRequired")),
+    category_name: z.string().min(1, t("categoryRequired")),
+    detail: z.string().optional(),
+    linked_expense_ids: z.array(z.string()),
+  });
   const [incomeList, setIncomeList] = useState<Income[]>([]);
   const [crops, setCrops] = useState<Crop[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -271,7 +272,7 @@ const IncomePage = () => {
           )}
           {linkedExpenses.length > 0 && (
             <div className="text-xs text-muted-foreground">
-              Linked to {linkedExpenses.length} expense(s) ฿
+              {t('linkedTo')} {linkedExpenses.length} {t('items')} ฿
               {linkedExpenses
                 .reduce((sum, exp) => sum + exp.amount, 0)
                 .toLocaleString("en-US")}
@@ -408,7 +409,7 @@ const IncomePage = () => {
               onValueChange={(value) => setValue("crop_id", value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a crop" />
+                <SelectValue placeholder={t("selectCrop")} />
               </SelectTrigger>
               <SelectContent>
                 {crops.map((crop) => (
@@ -427,11 +428,11 @@ const IncomePage = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium">Price *</label>
+              <label className="text-sm font-medium">{t('priceUnit')} *</label>
               <Input
                 type="number"
                 step="0.01"
-                placeholder="Enter price"
+                placeholder={t("enterPrice")}
                 {...register("price", { valueAsNumber: true })}
               />
               {errors.price && (
@@ -442,11 +443,11 @@ const IncomePage = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium">Amount *</label>
+              <label className="text-sm font-medium">{t('amount')} *</label>
               <Input
                 type="number"
                 step="0.01"
-                placeholder="Enter amount"
+                placeholder={t("enterAmount")}
                 {...register("amount", { valueAsNumber: true })}
               />
               {errors.amount && (
@@ -458,24 +459,24 @@ const IncomePage = () => {
           </div>
 
           <div>
-            <label className="text-sm font-medium">Unit (Optional)</label>
+            <label className="text-sm font-medium">{t('unitOptional')}</label>
             <Input
               type="text"
-              placeholder="Enter unit (e.g., kg, tons, bags)"
+              placeholder={t("enterUnit")}
               {...register("unit")}
             />
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-sm font-medium">Sub-total *</label>
+              <div className="flex items-center justify-between mb-1">
+              <label className="text-sm font-medium">{t("subTotal")} *</label>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground">
                   {!isManualSubTotal && watchedPrice && watchedAmount
-                    ? `Auto: ${watchedPrice} × ${watchedAmount} = ${(
+                    ? `${t("auto")} : ${watchedPrice} × ${watchedAmount} = ${(
                         watchedPrice * watchedAmount
                       ).toLocaleString("en-US")}`
-                    : "Manual entry"}
+                    : t("manualEntry")}
                 </span>
                 {isManualSubTotal && watchedPrice && watchedAmount && (
                   <button
@@ -486,7 +487,7 @@ const IncomePage = () => {
                     }}
                     className="text-xs text-primary hover:underline"
                   >
-                    Reset to Auto
+                    {t("resetToAuto")}
                   </button>
                 )}
               </div>
@@ -494,7 +495,7 @@ const IncomePage = () => {
             <Input
               type="number"
               step="0.01"
-              placeholder="Enter sub-total amount"
+              placeholder={t("enterTotal")}
               {...register("sub_total", {
                 valueAsNumber: true,
                 onChange: () => setIsManualSubTotal(true),
@@ -512,21 +513,21 @@ const IncomePage = () => {
             <div className="bg-muted/50 p-3 rounded-lg">
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span>Sub-total:</span>
+                  <span>{t("subTotal")}:</span>
                   <span className="font-medium">
                     ฿{watchedSubTotal.toLocaleString("en-US")}
                   </span>
                 </div>
                 {selectedExpenseIds.length > 0 && (
                   <div className="flex justify-between text-red-600">
-                    <span>Linked expenses ({selectedExpenseIds.length}):</span>
+                    <span>{`${t("linkedExpenses")} (${selectedExpenseIds.length}):`}</span>
                     <span className="font-medium">
                       -฿{selectedExpensesTotal.toLocaleString("en-US")}
                     </span>
                   </div>
                 )}
                 <div className="flex justify-between font-semibold text-base border-t pt-2">
-                  <span>Net Total:</span>
+                  <span>{t("netTotal")}:</span>
                   <span
                     className={total >= 0 ? "text-green-600" : "text-red-600"}
                   >
@@ -538,7 +539,7 @@ const IncomePage = () => {
           )}
 
           <div>
-            <label className="text-sm font-medium">Date *</label>
+            <label className="text-sm font-medium">{t("date")} *</label>
             <Input type="date" {...register("income_date")} />
             {errors.income_date && (
               <p className="text-sm text-destructive mt-1">
@@ -548,10 +549,10 @@ const IncomePage = () => {
           </div>
 
           <div>
-            <label className="text-sm font-medium">Category *</label>
+            <label className="text-sm font-medium">{t("category")} *</label>
             <Input
               type="text"
-              placeholder="Enter category (e.g., Sales, Harvest, Market)"
+              placeholder={t("enterCategory")}
               {...register("category_name")}
             />
             {errors.category_name && (
@@ -562,9 +563,9 @@ const IncomePage = () => {
           </div>
 
           <div>
-            <label className="text-sm font-medium">Details (Optional)</label>
+            <label className="text-sm font-medium">{t("detailsOptional")}</label>
             <Textarea
-              placeholder="Add any additional details about this income..."
+              placeholder={t("addDetails")}
               {...register("detail")}
               rows={3}
             />

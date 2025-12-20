@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 type Language = "en" | "th";
 
@@ -60,7 +60,7 @@ const translations: Record<string, any> = {
     priceAmount: "Price/Amount",
     cropProductivity: "Crop Productivity",
     fertilizerUsagePerTree: "Fertilizer Usage per Tree",
-
+    from: 'From',
     // Navigation
     dashboardNav: "Dashboard",
     income: "Income",
@@ -78,6 +78,23 @@ const translations: Record<string, any> = {
     noIncomeRecords: "No income records found",
     editIncome: "Edit Income",
     amount: "Amount",
+    priceUnit: "Price per Unit",
+    unitOptional: "Unit (Optional)",
+    subTotal: "Sub-total",
+    netTotal: "Net Total",
+    linkedExpenses: "Linked expenses",
+    optional: '(optional)',
+    linkedTo: 'Linked to',
+    items: 'Item(s)',
+    itemSelected: 'item(s) selected',
+    enterPrice: "Enter price",
+    enterAmount: "Enter amount",
+    enterUnit: "Enter unit (e.g., kg, tons, bags)",
+    date: "Date",
+    category: "Category",
+    subTotalMustBePositive: "Sub-total must be a positive number",
+    priceMustBePositive: "Price must be a positive number",
+    amountMustBePositive: "Amount must be a positive number",
 
     // Expense Page
     trackAndManageExpenses: "Track and manage your farm expenses",
@@ -94,12 +111,10 @@ const translations: Record<string, any> = {
     selectCrop: "Select a crop",
     cost: "Cost",
     unit: "Unit",
-    unitOptional: "Unit (Optional)",
     total: "Total",
     details: "Details",
     detailsOptional: "Details (Optional)",
     enterUnitCost: "Enter unit cost",
-    enterUnit: "Enter unit (e.g., kg, liters, bags)",
     enterTotal: "Enter total",
     enterDate: "Enter date",
     enterCategory: "Enter category (e.g., Seeds, Fertilizer, Equipment)",
@@ -109,7 +124,6 @@ const translations: Record<string, any> = {
     resetToAuto: "Reset to Auto",
     areYouSureDeleteExpense: "Are you sure you want to delete this expense?",
     costMustBePositive: "Cost must be a positive number",
-    amountMustBePositive: "Amount must be a positive number",
     totalMustBePositive: "Total must be a positive number",
     pleaseSelectCrop: "Please select a crop",
     dateRequired: "Date is required",
@@ -354,7 +368,7 @@ const translations: Record<string, any> = {
     priceAmount: "ราคา/จำนวน",
     cropProductivity: "ประสิทธิของแปลง",
     fertilizerUsagePerTree: "การใช้ปุ๋ยต่อต้น",
-
+    from: 'จาก',
     // Navigation
     dashboardNav: "แดชบอร์ด",
     income: "รายได้",
@@ -372,6 +386,24 @@ const translations: Record<string, any> = {
     noIncomeRecords: "ไม่พบรายการรายได้",
     editIncome: "แก้ไข รายรับ",
     amount: "จำนวน",
+    priceUnit: "ราคาต่อหน่วย",
+    unitOptional: 'หน่วยนับ (ไม่บังคับ)',
+    subTotal: "ยอดรวมย่อย",
+    netTotal: "ยอดสุทธิ",
+    optional: '(ไม่บังคับ)',
+    linkedExpenses: "ค่าใช้จ่ายที่เชื่อมโยง",
+    linkedTo: 'เชื่อมโยง',
+    items: 'รายการ',
+    itemSelected: 'รายการที่เลือก',
+    enterPrice: "กรอกราคา",
+    enterAmount: "กรอกจำนวน",
+    enterUnit: "กรอกหน่วย (เช่น กก., ตัน, ถุง)",
+    date: "วันที่",
+    category: "หมวดหมู่",
+    subTotalMustBePositive: "ยอดรวมย่อยต้องเป็นจำนวนบวก",
+    priceMustBePositive: "ราคาต่อหน่วยต้องเป็นจำนวนบวก",
+    amountMustBePositive: "จำนวนต้องเป็นจำนวนบวก",
+
 
     // Expense Page
     trackAndManageExpenses: "ติดตามและจัดการรายจ่ายฟาร์มของคุณ",
@@ -388,11 +420,9 @@ const translations: Record<string, any> = {
     selectCrop: "เลือกแปลง",
     cost: "ต้นทุน",
     unit: "หน่วย",
-    unitOptional: "หน่วย (ไม่จำเป็น)",
     details: "รายละเอียด",
-    detailsOptional: "รายละเอียด (ไม่จำเป็น)",
+    detailsOptional: "รายละเอียด (ไม่บังคับ)",
     enterUnitCost: "กรอกต้นทุนต่อหน่วย",
-    enterUnit: "กรอกหน่วย (เช่น กก., ลิตร, ถุง)",
     enterTotal: "กรอกยอดรวม",
     enterDate: "กรอกวันที่",
     enterCategory: "กรอกหมวดหมู่ (เช่น เมล็ดพันธุ์, ปุ๋ย, อุปกรณ์)",
@@ -402,7 +432,6 @@ const translations: Record<string, any> = {
     resetToAuto: "รีเซ็ตเป็นอัตโนมัติ",
     areYouSureDeleteExpense: "คุณแน่ใจหรือไม่ที่จะลบรายจ่ายนี้?",
     costMustBePositive: "ต้นทุนต้องเป็นจำนวนบวก",
-    amountMustBePositive: "จำนวนต้องเป็นจำนวนบวก",
     totalMustBePositive: "ยอดรวมต้องเป็นจำนวนบวก",
     pleaseSelectCrop: "กรุณาเลือกแปลง",
     dateRequired: "ต้องระบุวันที่",
