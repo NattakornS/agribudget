@@ -80,7 +80,7 @@ const ProfitStackChart: React.FC<IncomeBreakdownChartProps> = ({
 
       const hue = (index * 137.5) % 360; // Golden angle for good color distribution
       return {
-        label: `${cropName} - Expenses`,
+        label: `${cropName} - ${t('cost')}`,
         data,
         backgroundColor: `hsla(${hue}, 60%, 45%, 0.8)`, // Darker shade for expenses
         borderColor: `hsl(${hue}, 60%, 35%)`,
@@ -101,7 +101,7 @@ const ProfitStackChart: React.FC<IncomeBreakdownChartProps> = ({
 
       const hue = (index * 137.5) % 360; // Same hue as expenses but lighter
       return {
-        label: `${cropName} - Profit`,
+        label: `${cropName} - ${t('profitable')}`,
         data,
         backgroundColor: `hsla(${hue}, 70%, 65%, 0.8)`, // Lighter shade for profit
         borderColor: `hsl(${hue}, 70%, 55%)`,
@@ -140,6 +140,7 @@ const ProfitStackChart: React.FC<IncomeBreakdownChartProps> = ({
                 display: true,
                 text: t("breakDownIncomePerYear"),
                 font: {
+                  family: "Itim",
                   size: 16,
                   weight: "bold",
                 },
@@ -220,6 +221,7 @@ const ProfitStackChart: React.FC<IncomeBreakdownChartProps> = ({
                   display: true,
                   text: "Year",
                   font: {
+                    family: "Itim",
                     size: 14,
                     weight: "bold",
                   },
@@ -230,8 +232,9 @@ const ProfitStackChart: React.FC<IncomeBreakdownChartProps> = ({
                 beginAtZero: true,
                 title: {
                   display: true,
-                  text: "Amount (฿)",
+                  text: `${t('income')} (฿)`,
                   font: {
+                    family: "Itim",
                     size: 14,
                     weight: "bold",
                   },

@@ -17,6 +17,7 @@ import FloatingActionButton from "@/components/FloatingActionButton";
 import RecordList from "@/components/RecordList";
 import EditModal from "@/components/EditModal";
 import LinkedExpenseSelector from "@/components/LinkedExpenseSelector";
+import CategoryFilter from "@/components/CategoryFilter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -57,6 +58,7 @@ const IncomePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedIncome, setSelectedIncome] = useState<Income | null>(null);
   const [selectedExpenseIds, setSelectedExpenseIds] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState(t('all'));
 
   // Get filters from context
   const { selectedCropId } = useCropFilter();
@@ -102,15 +104,26 @@ const IncomePage = () => {
   // Calculate net total (sub_total - selected expenses total)
   const total = watchedSubTotal - selectedExpensesTotal;
 
-  // Filter income list based on selected crop and year
+  // Extract unique categories from income
+  const incomeCategories = useMemo(() => {
+    const uniqueCategories = [...new Set(incomeList.map(income => income.categories?.name).filter(Boolean))];
+    return uniqueCategories.map((name, index) => ({
+      id: `category-${index}`,
+      name: name || t('uncategorized'),
+      color: ['green', 'blue', 'red', 'yellow', 'purple', 'orange'][index % 6]
+    }));
+  }, [incomeList, t]);
+
+  // Filter income list based on selected crop, year, and category
   const filteredIncomeList = useMemo(() => {
     return incomeList.filter((income) => {
       const incomeYear = new Date(income.income_date).getFullYear();
       const matchesYear = isAllYears || incomeYear === selectedYear;
       const matchesCrop = !selectedCropId || income.crop_id === selectedCropId;
-      return matchesYear && matchesCrop;
+      const matchesCategory = selectedCategory === t('all') || income.categories?.name === selectedCategory;
+      return matchesYear && matchesCrop && matchesCategory;
     });
-  }, [incomeList, selectedCropId, selectedYear, isAllYears]);
+  }, [incomeList, selectedCropId, selectedYear, isAllYears, selectedCategory]);
 
   // Auto-calculate sub_total when price or amount changes, unless manually overridden
   useEffect(() => {
@@ -337,6 +350,15 @@ const IncomePage = () => {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
+
+      {/* Category Filter */}
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm">
+        <CategoryFilter
+          categories={incomeCategories}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+        />
+      </div>
 
       {/* Summary Card */}
       <Card>

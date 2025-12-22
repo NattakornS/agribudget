@@ -11,6 +11,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import FloatingActionButton from '@/components/FloatingActionButton';
 import RecordList from '@/components/RecordList';
 import EditModal from '@/components/EditModal';
+import CategoryFilter from '@/components/CategoryFilter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { Input } from '@/components/ui/input';
@@ -40,6 +41,7 @@ const ExpensePage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState(t('all'));
   
   // Get filters from context
   const { selectedCropId } = useCropFilter();
@@ -68,15 +70,28 @@ const ExpensePage = () => {
   const watchedAmount = watch('amount');
 
 
-  // Filter expenses list based on selected crop and year
+  // Extract unique categories from expenses
+  const expenseCategories = useMemo(() => {
+    const uniqueCategories = [...new Set(expenses.map(expense => expense.categories?.name).filter(Boolean))];
+    return uniqueCategories.map((name, index) => ({
+      id: `category-${index}`,
+      name: name || t('uncategorized'),
+      color: ['green', 'blue', 'red', 'yellow', 'purple', 'orange'][index % 6]
+    }));
+  }, [expenses, t]);
+
+  // Filter expenses list based on selected crop, year, and category
   const filteredExpenses = useMemo(() => {
     return expenses.filter(expense => {
       const expenseYear = new Date(expense.expense_date).getFullYear();
       const matchesYear = isAllYears || expenseYear === selectedYear;
       const matchesCrop = !selectedCropId || expense.crop_id === selectedCropId;
-      return matchesYear && matchesCrop;
+      const matchesCategory = selectedCategory === t('all') || expense.categories?.name === selectedCategory;
+      console.log(expense.categories?.name ,selectedCategory);
+      
+      return matchesYear && matchesCrop && matchesCategory;
     });
-  }, [expenses, selectedCropId, selectedYear, isAllYears]);
+  }, [expenses, selectedCropId, selectedYear, isAllYears, selectedCategory]);
 
   // Auto-calculate total when cost or amount changes, unless manually overridden
   useEffect(() => {
@@ -251,6 +266,15 @@ const ExpensePage = () => {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
+
+      {/* Category Filter */}
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm">
+        <CategoryFilter
+          categories={expenseCategories}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+        />
+      </div>
 
       {/* Summary Card */}
       <Card>

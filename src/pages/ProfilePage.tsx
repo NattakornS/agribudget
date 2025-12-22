@@ -1,6 +1,8 @@
 import CropSettings from "@/components/CropSettings";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ThemeToggle from "@/components/ThemeToggle";
+import ProfilePictureUpload from "@/components/ProfilePictureUpload";
+import AuthProviderManager from "@/components/AuthProviderManager";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -148,6 +150,18 @@ const ProfilePage = () => {
     }
   };
 
+  const handleAvatarUpdate = (avatarUrl: string) => {
+    if (profile) {
+      setProfile({
+        ...profile,
+        user_metadata: {
+          ...profile.user_metadata,
+          avatar_url: avatarUrl,
+        },
+      });
+    }
+  };
+
   const handleCancelEdit = () => {
     if (profile) {
       reset({
@@ -249,19 +263,22 @@ const ProfilePage = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Avatar placeholder */}
-            <div className="flex items-center gap-4">
-              <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center">
-                <User className="h-10 w-10 text-muted-foreground" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="font-medium">
-                  {profile.user_metadata?.full_name || t("noNameSet")}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {profile.user_metadata?.farm_name || t("farmNameNotSet")}
-                </p>
-              </div>
+            {/* Profile Picture Upload */}
+            <ProfilePictureUpload
+              currentAvatarUrl={profile.user_metadata?.avatar_url}
+              userId={profile.id}
+              onAvatarUpdate={handleAvatarUpdate}
+              fullName={profile.user_metadata?.full_name}
+            />
+
+            {/* User Info */}
+            <div className="text-center">
+              <h3 className="font-medium text-lg">
+                {profile.user_metadata?.full_name || t("noNameSet")}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {profile.user_metadata?.farm_name || t("farmNameNotSet")}
+              </p>
             </div>
 
             {/* Email */}
@@ -412,6 +429,12 @@ const ProfilePage = () => {
         autoOpenModal={autoOpenCropModal}
         onModalClose={() => setAutoOpenCropModal(false)}
       />
+
+      {/* Authentication Provider Management */}
+      <div className="hidden">
+
+      <AuthProviderManager  />
+      </div>
 
       {/* Additional Stats Card */}
       <Card>

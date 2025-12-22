@@ -247,6 +247,8 @@ const translations: Record<string, any> = {
     navigation: "Navigation",
     averagePricePerUnit: "price per unit",
     otherSetting: "Other Setting",
+    jpgPngGifMax5MB: "5Mb of Image",
+    all: "All"
   },
   th: {
     otherSetting: "ตั้งค่าอื่น",
@@ -485,6 +487,8 @@ const translations: Record<string, any> = {
     breakDownIncomePerYear: "แจงรายละเอียดกำไรรายจ่ายต่อปี",
     navigation: "เมนู",
     averagePricePerUnit: "ราคาต่อหน่วย",
+    jpgPngGifMax5MB: "ไฟล์ภาพไม่เกิน 5Mb",
+    all: "ทั้งหมด"
   },
 };
 

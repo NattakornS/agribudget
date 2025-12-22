@@ -16,6 +16,7 @@ import LoginPage from "./pages/LoginPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import ThemeTestPage from "./pages/ThemeTestPage";
+import NewDesignPage from "./pages/NewDesignPage";
 
 function App() {
   return (
@@ -46,6 +47,7 @@ function App() {
                   <Route path="/theme" element={<ThemeTestPage />} />
                 </Route>
               </Route>
+              <Route path="/testapp" element={<NewDesignPage/>}></Route>
             </Routes>
           </BrowserRouter>
         </AuthProvider>
