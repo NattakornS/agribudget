@@ -1,22 +1,11 @@
-import { useEffect, useState, useMemo } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import type { Crop, Expense, Income, IncomeFormData } from "@/types";
-import { getExpenses } from "@/services/expenseService";
-import {
-  getIncome,
-  createIncome,
-  updateIncome,
-  deleteIncome,
-} from "@/services/incomeService";
-import { useCropFilter } from "@/contexts/CropFilterContext";
-import { useYearFilter } from "@/contexts/YearFilterContext";
-import FloatingActionButton from "@/components/FloatingActionButton";
-import RecordList from "@/components/RecordList";
-import EditModal from "@/components/EditModal";
-import LinkedExpenseSelector from "@/components/LinkedExpenseSelector";
 import CategoryFilter from "@/components/CategoryFilter";
+import EditModal from "@/components/EditModal";
+import FloatingActionButton from "@/components/FloatingActionButton";
+import LinkedExpenseSelector from "@/components/LinkedExpenseSelector";
+import PageNavHeader from "@/components/PageNavHeader";
+import RecordList from "@/components/RecordList";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -26,13 +15,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, TrendingUp, AlertCircle } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { useCropFilter } from "@/contexts/CropFilterContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import PageNavHeader from "@/components/PageNavHeader";
+import { useYearFilter } from "@/contexts/YearFilterContext";
+import { getExpenses } from "@/services/expenseService";
+import {
+  createIncome,
+  deleteIncome,
+  getIncome,
+  updateIncome,
+} from "@/services/incomeService";
+import type { Expense, Income, IncomeFormData } from "@/types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertCircle, Calendar, TrendingUp } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 // schema will be created inside component to allow translated error messages
 
