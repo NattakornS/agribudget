@@ -5,34 +5,44 @@ import { findOrCreateCategory } from './categoryService';
 const INCOME_TABLE = 'income';
 const JOIN_TABLE = 'income_expenses';
 
+let inFlightGetIncome: Promise<any> | null = null;
+
 export const getIncome = async () => {
-  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-  if (sessionError || !sessionData.session) throw new Error('User not authenticated');
+  if (inFlightGetIncome) return inFlightGetIncome;
 
-  const { data, error } = await supabase
-    .from(INCOME_TABLE)
-    .select(`
-      id,
-      income_date,
-      sub_total,
-      detail,
-      crops ( name ),
-      crop_id,
-      price,
-      unit,
-      total,
-      amount,
-      categories ( name ),
-      income_expenses ( expenses ( id, expense_date, amount, detail, categories (name) ) )
-    `)
-    .eq('user_id', sessionData.session.user.id)
-    .order('income_date', { ascending: false });
+  inFlightGetIncome = (async () => {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData.session) throw new Error('User not authenticated');
 
-  if (error) throw error;
-  const formData = data.map(el=>{
-    return {...el,expenses:el.income_expenses.map(eel=>eel.expenses)}
-  })
-  return formData;
+    const { data, error } = await supabase
+      .from(INCOME_TABLE)
+      .select(`
+        id,
+        income_date,
+        sub_total,
+        detail,
+        crops ( name ),
+        crop_id,
+        price,
+        unit,
+        total,
+        amount,
+        categories ( name ),
+        income_expenses ( expenses ( id, expense_date, amount, detail, categories (name) ) )
+      `)
+      .eq('user_id', sessionData.session.user.id)
+      .order('income_date', { ascending: false });
+
+    if (error) throw error;
+    const formData = data.map((el: any) => {
+      return { ...el, expenses: el.income_expenses.map((eel: any) => eel.expenses) };
+    });
+    return formData;
+  })().finally(() => {
+    inFlightGetIncome = null;
+  });
+
+  return inFlightGetIncome;
 };
 
 export const createIncome = async (formData: IncomeFormData) => {

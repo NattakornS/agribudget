@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import type { Crop, Expense, ExpenseFormData } from '@/types';
-import { getCrops } from '@/services/cropService';
 import { getExpenses, createExpense, deleteExpense, updateExpense } from '@/services/expenseService';
 import { useCropFilter } from '@/contexts/CropFilterContext';
 import { useYearFilter } from '@/contexts/YearFilterContext';
@@ -12,6 +11,7 @@ import FloatingActionButton from '@/components/FloatingActionButton';
 import RecordList from '@/components/RecordList';
 import ExpenseAddDialogNew from '@/components/ExpenseAddDialogNew';
 import CategoryFilter from '@/components/CategoryFilter';
+import PageNavHeader from '@/components/PageNavHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -33,15 +33,14 @@ const getExpenseSchema = (t: (key: string) => string) => z.object({
 const ExpensePage = () => {
   const { t } = useLanguage();
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [crops, setCrops] = useState<Crop[]>([]);
+  const { selectedCropId, crops: contextCrops, selectedCrop } = useCropFilter();
+  const crops = contextCrops;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [selectedCategory, setSelectedCategory] = useState(t('all'));
   
-  // Get filters from context
-  const { selectedCropId } = useCropFilter();
   const { selectedYear, isAllYears } = useYearFilter();
 
   const defaultValues: ExpenseFormData = {
@@ -111,9 +110,8 @@ const ExpensePage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [expensesData, cropsData] = await Promise.all([getExpenses(), getCrops()]);
+        const expensesData = await getExpenses();
         setExpenses(expensesData as unknown as Expense[]);
-        setCrops(cropsData);
         setError(null);
       } catch (err: any) {
         setError(err.message);
@@ -248,13 +246,12 @@ const ExpensePage = () => {
 
   return (
     <div className="space-y-6 pb-20">
-      {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">{t('expenses')}</h1>
-        <p className="text-muted-foreground">
-          {t('trackAndManageExpenses')}
-        </p>
-      </div>
+      {/* Page Header with Cover Image */}
+      <PageNavHeader
+        title={t('expenses')}
+        description={t('trackAndManageExpenses')}
+        coverImage={selectedCrop?.crop_type?.image}
+      />
 
       {/* Error Alert */}
       {error && (

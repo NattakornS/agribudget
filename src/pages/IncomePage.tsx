@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import type { Crop, Expense, Income, IncomeFormData } from "@/types";
-import { getCrops } from "@/services/cropService";
 import { getExpenses } from "@/services/expenseService";
 import {
   getIncome,
@@ -33,6 +32,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, TrendingUp, AlertCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import PageNavHeader from "@/components/PageNavHeader";
 
 // schema will be created inside component to allow translated error messages
 
@@ -51,7 +51,8 @@ const IncomePage = () => {
     linked_expense_ids: z.array(z.string()),
   });
   const [incomeList, setIncomeList] = useState<Income[]>([]);
-  const [crops, setCrops] = useState<Crop[]>([]);
+  const { selectedCropId, crops: contextCrops, selectedCrop } = useCropFilter();
+  const crops = contextCrops;
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -60,8 +61,6 @@ const IncomePage = () => {
   const [selectedExpenseIds, setSelectedExpenseIds] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState(t('all'));
 
-  // Get filters from context
-  const { selectedCropId } = useCropFilter();
   const { selectedYear, isAllYears } = useYearFilter();
 
   const defaultValues: IncomeFormData = {
@@ -155,13 +154,8 @@ const IncomePage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [incomeData, cropsData, expensesData] = await Promise.all([
-          getIncome(),
-          getCrops(),
-          getExpenses(),
-        ]);
+        const [incomeData, expensesData] = await Promise.all([getIncome(), getExpenses()]);
         setIncomeList(incomeData as unknown as Income[]);
-        setCrops(cropsData);
         setExpenses(expensesData as unknown as Expense[]);
         setError(null);
       } catch (err: any) {
@@ -335,13 +329,12 @@ const IncomePage = () => {
 
   return (
     <div className="space-y-6 pb-20">
-      {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">{t('income')}</h1>
-        <p className="text-muted-foreground">
-          {t('trackAndManageIncome')}
-        </p>
-      </div>
+      {/* Page Header with Cover Image */}
+      <PageNavHeader
+        title={t('income')}
+        description={t('trackAndManageIncome')}
+        coverImage={selectedCrop?.crop_type?.image}
+      />
 
       {/* Error Alert */}
       {error && (

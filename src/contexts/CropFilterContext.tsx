@@ -6,6 +6,7 @@ import { getCrops } from '@/services/cropService';
 interface CropFilterContextType {
   crops: Crop[];
   selectedCropId: string | null;
+  selectedCrop: Crop | null;
   setSelectedCropId: (cropId: string | null) => void;
   loading: boolean;
   error: string | null;
@@ -16,6 +17,7 @@ const CropFilterContext = createContext<CropFilterContextType | undefined>(undef
 export const CropFilterProvider = ({ children }: { children: ReactNode }) => {
   const [crops, setCrops] = useState<Crop[]>([]);
   const [selectedCropId, setSelectedCropId] = useState<string | null>(null);
+  const [selectedCrop, setSelectedCrop] = useState<Crop | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,9 +38,19 @@ export const CropFilterProvider = ({ children }: { children: ReactNode }) => {
     fetchCrops();
   }, []);
 
+  useEffect(() => {
+    if (selectedCropId) {
+      const crop = crops.find((c) => c.id === selectedCropId);
+      setSelectedCrop(crop || null);
+    } else {
+      setSelectedCrop(null);
+    }
+  }, [selectedCropId, crops]);
+
   const value = {
     crops,
     selectedCropId,
+    selectedCrop,
     setSelectedCropId,
     loading,
     error,

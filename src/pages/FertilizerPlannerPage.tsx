@@ -49,6 +49,7 @@ import {
 import { useCropFilter } from "@/contexts/CropFilterContext";
 import { getDuration } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
+import PageNavHeader from "@/components/PageNavHeader";
 
 const planSchema = z.object({
   crop_id: z.string().min(1, "Please select a crop"),
@@ -73,7 +74,7 @@ const FertilizerPlannerPage = () => {
   const [selectedExpenseIds, setSelectedExpenseIds] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
 
-  const { selectedCropId } = useCropFilter();
+  const { selectedCropId,selectedCrop } = useCropFilter();
   const { selectedYear, isAllYears } = useYearFilter();
 
   const defaultValues = {
@@ -391,16 +392,15 @@ const FertilizerPlannerPage = () => {
   return (
     <div className="space-y-6 pb-20">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">
-            {t("fertilizerPlanner.title")}
-          </h1>
-          <p className="text-muted-foreground">
-            {t("fertilizerPlanner.description")}
-          </p>
+      <div className="relative h-full w-full">
+        <PageNavHeader
+          title={t("income")}
+          description={t("trackAndManageIncome")}
+          coverImage={selectedCrop?.crop_type?.image}
+        />
+        <div className="absolute inset-y-2 right-2">
+          <ViewToggle view={viewMode} onViewChange={setViewMode} />
         </div>
-        <ViewToggle view={viewMode} onViewChange={setViewMode} />
       </div>
 
       {/* Error Alert */}

@@ -10,8 +10,13 @@ export interface Crop {
   area?: number | null;
   amount?: number | null;
   started_date?: string | null;
+  crop_type?: CropType | null;
 }
-
+export interface CropType {
+  name?: string | null;
+  description?: string | null;
+  image?: string | null;
+}
 export type CropFormData = Omit<Crop, 'id' | 'created_at' | 'updated_at' | 'user_id'>;
 
 export interface Category {

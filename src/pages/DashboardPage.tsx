@@ -3,6 +3,7 @@ import { ExpensePieChart } from "@/components/ExpensePieChart";
 import { FertilizerUsageTable } from "@/components/FertilizerUsageTable";
 import PriceAmountLineChart from "@/components/PriceAmountLineChart";
 import ProfitStackChart from "@/components/ProfitStackChart";
+import PageNavHeader from "@/components/PageNavHeader";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -114,7 +115,7 @@ const DashboardPage = () => {
   }, []);
 
   const { selectedYear, isAllYears } = useYearFilter();
-  const { selectedCropId } = useCropFilter();
+  const { selectedCropId, selectedCrop } = useCropFilter();
 
   // Filter data by year and crop
   const filteredIncome = useMemo(() => {
@@ -205,13 +206,12 @@ const DashboardPage = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">{t('dashboard')}</h1>
-        <p className="text-muted-foreground">
-          {t('overviewOfPerformance')}
-        </p>
-      </div>
+      {/* Page Header with Cover Image */}
+      <PageNavHeader
+        title={t('dashboard')}
+        description={t('overviewOfPerformance')}
+        coverImage={selectedCrop?.crop_type?.image}
+      />
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">

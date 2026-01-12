@@ -1,4 +1,5 @@
 import CropSettings from "@/components/CropSettings";
+import PageNavHeader from "@/components/PageNavHeader";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ThemeToggle from "@/components/ThemeToggle";
 import ProfilePictureUpload from "@/components/ProfilePictureUpload";
@@ -219,20 +220,20 @@ const ProfilePage = () => {
 
   return (
     <div className="space-y-6 pb-20">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">{t("profile")}</h1>
-          <p className="text-muted-foreground">{t("manageAccount")}</p>
-        </div>
-        <div className="grid gap-2 visible md:invisible">
-          <LanguageSwitcher />
-          <ThemeToggle></ThemeToggle>
-          <Button variant="default" onClick={signOut} className="justify-start">
-            <LogOut className="h-4 w-4" />
-            <span>{t("logout")}</span>
-          </Button>
-        </div>
+      {/* Page Header */}
+      <PageNavHeader
+        title={t("profile")}
+        description={t("manageAccount")}
+      />
+
+      {/* Quick Actions */}
+      <div className="flex gap-2 visible md:invisible">
+        <LanguageSwitcher />
+        <ThemeToggle></ThemeToggle>
+        <Button variant="default" onClick={signOut} className="justify-start">
+          <LogOut className="h-4 w-4" />
+          <span>{t("logout")}</span>
+        </Button>
       </div>
 
       {/* Success Alert */}

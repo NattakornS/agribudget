@@ -4,34 +4,44 @@ import { findOrCreateCategory } from './categoryService';
 
 const TABLE_NAME = 'expenses';
 
+let inFlightGetExpenses: Promise<any> | null = null;
+
 export const getExpenses = async () => {
-  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-  if (sessionError || !sessionData.session) {
-    throw new Error('User not authenticated');
-  }
-  const userId = sessionData.session.user.id;
+  if (inFlightGetExpenses) return inFlightGetExpenses;
 
-  const { data, error } = await supabase
-    .from(TABLE_NAME)
-    .select(`
-      id,
-      created_at,
-      expense_date,
-      amount,
-      total,
-      unit,
-      cost,
-      detail,
-      crop_id,
-      crops ( name ),
-      category_id,
-      categories ( name )
-    `)
-    .eq('user_id', userId)
-    .order('expense_date', { ascending: false });
+  inFlightGetExpenses = (async () => {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData.session) {
+      throw new Error('User not authenticated');
+    }
+    const userId = sessionData.session.user.id;
 
-  if (error) throw error;
-  return data;
+    const { data, error } = await supabase
+      .from(TABLE_NAME)
+      .select(`
+        id,
+        created_at,
+        expense_date,
+        amount,
+        total,
+        unit,
+        cost,
+        detail,
+        crop_id,
+        crops ( name ),
+        category_id,
+        categories ( name )
+      `)
+      .eq('user_id', userId)
+      .order('expense_date', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  })().finally(() => {
+    inFlightGetExpenses = null;
+  });
+
+  return inFlightGetExpenses;
 };
 
 export const createExpense = async (formData: ExpenseFormData) => {
