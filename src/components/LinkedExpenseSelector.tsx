@@ -1,6 +1,9 @@
-import ExpenseAddDialog from "@/components/ExpenseAddDialog";
-import { useState, useMemo } from "react";
-import type { Expense, Crop } from "@/types";
+import ExpenseAddDialogNew from "@/components/ExpenseAddDialogNew";
+import { useState, useMemo, useEffect } from "react";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import type { Expense, Crop, ExpenseFormData } from "@/types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Search, Plus, Calendar, ListChecks, ListTodo } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { createExpense } from "@/services/expenseService";
 
 
 interface LinkedExpenseSelectorProps {
@@ -27,8 +31,36 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isManualTotal, setIsManualTotal] = useState(false);
 
-  const {t} = useLanguage()
+  const {t} = useLanguage();
+
+  const getExpenseSchema = (t: (key: string) => string) => z.object({
+    crop_id: z.string().min(1, t('pleaseSelectCrop')),
+    cost: z.number().positive(t('costMustBePositive')),
+    unit: z.string().optional(),
+    amount: z.number().positive(t('amountMustBePositive')),
+    total: z.number().positive(t('totalMustBePositive')),
+    expense_date: z.string().min(1, t('dateRequired')),
+    category_name: z.string().min(1, t('categoryRequired')),
+    detail: z.string().optional(),
+  });
+
+  const defaultValues: ExpenseFormData = {
+    expense_date: new Date().toISOString().split('T')[0],
+    cost: 0,
+    unit: '',
+    amount: 0,
+    total: 0,
+    crop_id: '',
+    category_name: '',
+    detail: ''
+  };
+
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<ExpenseFormData>({
+    resolver: zodResolver(getExpenseSchema(t)),
+    defaultValues
+  });
 
   // Sort expenses by latest date and filter by search query
   const filteredAndSortedExpenses = useMemo(() => {
@@ -41,7 +73,7 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
           expense.categories?.name?.toLowerCase().includes(query) ||
           expense.crops?.name?.toLowerCase().includes(query) ||
           expense.detail?.toLowerCase().includes(query) ||
-          expense.total.toString().includes(query)
+          expense.total?.toString().includes(query)
       );
     }
 
@@ -71,6 +103,17 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
     onSelectionChange([]);
   };
 
+    // Watch cost and amount for automatic calculation
+  const watchedCost = watch('cost');
+  const watchedAmount = watch('amount');
+  // Auto-calculate total when cost or amount changes, unless manually overridden
+  useEffect(() => {
+    if (!isManualTotal && watchedCost && watchedAmount) {
+      const calculatedTotal = watchedCost * watchedAmount;
+      setValue('total', calculatedTotal);
+    }
+  }, [watchedCost, watchedAmount, isManualTotal, setValue]);
+  
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -98,15 +141,37 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => setIsAddDialogOpen(true)}
+            onClick={() => {
+              setIsAddDialogOpen(true)
+              setIsManualTotal(false);
+              reset(defaultValues);
+            }}
           >
             <Plus className="h-4 w-4 mr-1" />
           </Button>
-          <ExpenseAddDialog
+          <ExpenseAddDialogNew
             isOpen={isAddDialogOpen}
-            onOpenChange={setIsAddDialogOpen}
-            onExpenseAdded={onExpenseAdded}
+            onClose={() => {
+              setIsAddDialogOpen(false);
+              setIsManualTotal(false);
+              reset(defaultValues);
+            }}
+            onSave={handleSubmit((data: ExpenseFormData) => {
+              createExpense(data);
+              onExpenseAdded();
+              setIsAddDialogOpen(false);
+              reset(defaultValues);
+              setIsManualTotal(false);
+            })}
+            onDelete={() => {}}
+            title={t('addExpense')}
             crops={crops}
+            register={register}
+            watch={watch}
+            setValue={setValue}
+            errors={errors}
+            isManualTotal={isManualTotal}
+            setIsManualTotal={setIsManualTotal}
           />
         </div>
       </div>

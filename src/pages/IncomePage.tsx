@@ -599,7 +599,7 @@ const IncomePage = () => {
             selectedExpenseIds={selectedExpenseIds}
             onSelectionChange={setSelectedExpenseIds}
             crops={crops}
-            onExpenseAdded={refreshExpenses}
+            onExpenseAdded={()=>refreshExpenses()}
           />
         </div>
       </EditModal>
