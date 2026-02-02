@@ -103,6 +103,14 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
     onSelectionChange([]);
   };
 
+  const handleSaveExpense = async (data: ExpenseFormData) => {
+    await createExpense(data);
+    onExpenseAdded();
+    setIsAddDialogOpen(false);
+    reset(defaultValues);
+    setIsManualTotal(false);
+  };
+
     // Watch cost and amount for automatic calculation
   const watchedCost = watch('cost');
   const watchedAmount = watch('amount');
@@ -156,13 +164,7 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
               setIsManualTotal(false);
               reset(defaultValues);
             }}
-            onSave={handleSubmit((data: ExpenseFormData) => {
-              createExpense(data);
-              onExpenseAdded();
-              setIsAddDialogOpen(false);
-              reset(defaultValues);
-              setIsManualTotal(false);
-            })}
+            onSave={handleSubmit(handleSaveExpense)}
             onDelete={() => {}}
             title={t('addExpense')}
             crops={crops}

@@ -9,6 +9,7 @@ interface EditModalProps {
   onDelete: () => void;
   title: string;
   children: React.ReactNode;
+  showDelete?: boolean;
 }
 
 const EditModal: React.FC<EditModalProps> = ({
@@ -18,6 +19,7 @@ const EditModal: React.FC<EditModalProps> = ({
   onDelete,
   title,
   children,
+  showDelete = true,
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -33,13 +35,15 @@ const EditModal: React.FC<EditModalProps> = ({
         </div>
         
         <DialogFooter className="flex-none gap-2 mt-6">
-          <Button
-            variant="destructive"
-            onClick={onDelete}
-            className='bg-red'
-          >
-            Delete
-          </Button>
+          {showDelete && (
+            <Button
+              variant="destructive"
+              onClick={onDelete}
+              className='bg-red'
+            >
+              Delete
+            </Button>
+          )}
           <Button onClick={onSave} variant="default" >
             Save
           </Button>

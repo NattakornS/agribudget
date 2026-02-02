@@ -327,6 +327,7 @@ const ExpensePage = () => {
         errors={errors}
         isManualTotal={isManualTotal}
         setIsManualTotal={setIsManualTotal}
+        showDelete={!!selectedExpense}
       />
     </div>
   );

@@ -19,6 +19,7 @@ interface ExpenseAddDialogNewProps {
   errors: FieldErrors<ExpenseFormData>;
   isManualTotal: boolean;
   setIsManualTotal: (value: boolean) => void;
+  showDelete?: boolean;
 }
 
 const ExpenseAddDialogNew = ({
@@ -34,6 +35,7 @@ const ExpenseAddDialogNew = ({
   errors,
   isManualTotal,
   setIsManualTotal,
+  showDelete = true,
 }: ExpenseAddDialogNewProps) => {
   const { t } = useLanguage();
 
@@ -47,6 +49,7 @@ const ExpenseAddDialogNew = ({
       onSave={onSave}
       onDelete={onDelete}
       title={title}
+      showDelete={showDelete}
     >
       <div className="space-y-4">
         <div>

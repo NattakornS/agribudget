@@ -414,6 +414,7 @@ const IncomePage = () => {
               }
             : () => {}
         }
+        showDelete={!!selectedIncome}
         title={selectedIncome ? t('editIncome') : t('addIncome')}
       >
         <div className="space-y-4">
