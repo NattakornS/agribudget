@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { getDuration } from "@/lib/utils";
+import { getDuration, formatArea, convertToSqm, convertFromSqm } from "@/lib/utils";
 import {
   createCrop,
   deleteCrop,
@@ -84,12 +84,15 @@ const CropSettings = ({
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<CropFormData>({
     // @ts-ignore - Skip type checking for resolver
     resolver: zodResolver(cropSchema),
     defaultValues,
   });
+
+  const watchedArea = watch("area");
 
   useEffect(() => {
     const fetchCrops = async () => {
@@ -127,7 +130,7 @@ const CropSettings = ({
       // Clean up empty string values from optional number fields
       const cleanedData = {
         ...data,
-        area: data.area || null,
+        area: data.area ? convertToSqm(Number(data.area), language) : null,
         amount: data.amount || null,
         started_date: data.started_date || null,
       };
@@ -147,7 +150,7 @@ const CropSettings = ({
       // Clean up empty string values from optional number fields
       const cleanedData = {
         ...data,
-        area: data.area || null,
+        area: data.area ? convertToSqm(Number(data.area), language) : null,
         amount: data.amount || null,
         started_date: data.started_date || null,
       };
@@ -188,7 +191,7 @@ const CropSettings = ({
       setValue("location", crop.location || "");
       setValue("latitude", crop.latitude);
       setValue("longitude", crop.longitude);
-      setValue("area", crop.area);
+      setValue("area", crop.area ? convertFromSqm(crop.area, language) : null);
       setValue("amount", crop.amount);
       setValue(
         "started_date",
@@ -307,7 +310,7 @@ const CropSettings = ({
                             {crop.area && (
                               <div className="flex items-center gap-1">
                                 <Ruler className="h-3 w-3" />
-                                {crop.area} m²
+                                {formatArea(crop.area, language)}
                               </div>
                             )}
                             {crop.amount && (
@@ -426,9 +429,14 @@ const CropSettings = ({
                 id="area"
                 type="number"
                 step="0.01"
-                placeholder="1000"
+                placeholder={language === 'th' ? "0.63" : "0.1"}
                 {...register("area")}
               />
+              {/* {watchedArea && !isNaN(Number(watchedArea)) && Number(watchedArea) > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {Number(watchedArea).toFixed(2)} {language === 'th' ? 'ไร่' : 'hectares'}
+                </p>
+              )} */}
               {errors.area && (
                 <p className="text-sm text-destructive">
                   {errors.area.message}

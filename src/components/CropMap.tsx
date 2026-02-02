@@ -11,6 +11,8 @@ import L from "leaflet";
 import type { Crop } from "@/types";
 // import { Card, CardContent } from '@/components/ui/card';
 import { Sprout } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { formatArea } from "@/lib/utils";
 
 // Fix for default markers in react-leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -67,6 +69,7 @@ const CropMap = ({
   selectedLocation,
   showClickInstruction = false,
 }: CropMapProps) => {
+  const { language } = useLanguage();
   const mapRef = useRef<LeafletMap>(null);
 
   // Default center (you can change this to your region)
@@ -121,7 +124,7 @@ const CropMap = ({
                   )}
                   {crop.area && (
                     <p className="text-sm text-muted-foreground mb-1">
-                      Area: {crop.area} m²
+                      Area: {formatArea(crop.area, language)}
                     </p>
                   )}
                   {crop.amount && (

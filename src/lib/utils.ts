@@ -81,3 +81,29 @@ export function getDuration(started_date: string, end_date: string, language: st
 
   return parts.join("");
 }
+
+export function formatArea(area: number, language: string): string {
+  if (language === 'th') {
+    const rai = area / 1600;
+    return `${rai.toFixed(2)} ไร่`;
+  } else {
+    const hectares = area / 10000;
+    return `${hectares.toFixed(2)} hectares`;
+  }
+}
+
+export function convertToSqm(value: number, language: string): number {
+  if (language === 'th') {
+    return value * 1600; // rai to sqm
+  } else {
+    return value * 10000; // hectares to sqm
+  }
+}
+
+export function convertFromSqm(area: number, language: string): number {
+  if (language === 'th') {
+    return area / 1600; // sqm to rai
+  } else {
+    return area / 10000; // sqm to hectares
+  }
+}

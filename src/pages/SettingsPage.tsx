@@ -14,6 +14,8 @@ import { Trash2, MapPin, Ruler, Hash, Calendar, AlertCircle, Sprout, Edit } from
 import EditModal from '@/components/EditModal';
 import FloatingActionButton from '@/components/FloatingActionButton';
 import CropMap from '@/components/CropMap';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { formatArea, convertToSqm, convertFromSqm } from '@/lib/utils';
 
 const cropSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -26,6 +28,7 @@ const cropSchema = z.object({
 });
 
 const SettingsPage = () => {
+  const { language } = useLanguage();
   const [crops, setCrops] = useState<Crop[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,11 +46,13 @@ const SettingsPage = () => {
     started_date: null,
   };
 
-  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<CropFormData>({
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<CropFormData>({
     // @ts-ignore - Skip type checking for resolver
     resolver: zodResolver(cropSchema),
     defaultValues
   });
+
+  const watchedArea = watch('area');
 
   useEffect(() => {
     const fetchCrops = async () => {
@@ -79,7 +84,7 @@ const SettingsPage = () => {
       // Clean up empty string values from optional number fields
       const cleanedData = {
         ...data,
-        area: data.area || null,
+        area: data.area ? convertToSqm(Number(data.area), language) : null,
         amount: data.amount || null,
         started_date: data.started_date || null,
       };
@@ -139,7 +144,7 @@ const SettingsPage = () => {
       setValue('location', crop.location || '');
       setValue('latitude', crop.latitude);
       setValue('longitude', crop.longitude);
-      setValue('area', crop.area);
+      setValue('area', crop.area ? convertFromSqm(crop.area, language) : null);
       setValue('amount', crop.amount);
       setValue('started_date', crop.started_date ? crop.started_date.split('T')[0] : '');
       setSelectedMapLocation(crop.latitude && crop.longitude ? { lat: crop.latitude, lng: crop.longitude } : null);
@@ -246,7 +251,7 @@ const SettingsPage = () => {
                           {crop.area && (
                             <div className="flex items-center gap-1">
                               <Ruler className="h-3 w-3" />
-                              {crop.area} m²
+                              {formatArea(crop.area, language)}
                             </div>
                           )}
                           {crop.amount && (
@@ -393,6 +398,11 @@ const SettingsPage = () => {
                 placeholder="1000"
                 {...register('area')}
               />
+              {watchedArea && !isNaN(Number(watchedArea)) && Number(watchedArea) > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  ≈ {formatArea(Number(watchedArea), language)}
+                </p>
+              )}
               {errors.area && (
                 <p className="text-sm text-destructive">{errors.area.message}</p>
               )}
