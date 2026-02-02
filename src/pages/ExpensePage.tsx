@@ -177,7 +177,10 @@ const ExpensePage = () => {
     } else {
       setSelectedExpense(null);
       setIsManualTotal(false);
-      reset(defaultValues);
+      reset({
+        ...defaultValues,
+        crop_id: selectedCropId || ""
+      });
     }
     setIsModalOpen(true);
   };

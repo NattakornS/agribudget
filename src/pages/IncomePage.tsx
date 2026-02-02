@@ -240,7 +240,10 @@ const IncomePage = () => {
       setSelectedIncome(null);
       setSelectedExpenseIds([]);
       setIsManualSubTotal(false);
-      reset(defaultValues);
+      reset({
+        ...defaultValues,
+        crop_id: selectedCropId || ""
+      });
     }
     setIsModalOpen(true);
   };

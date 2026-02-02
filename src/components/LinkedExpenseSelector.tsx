@@ -1,8 +1,8 @@
 import ExpenseAddDialogNew from "@/components/ExpenseAddDialogNew";
 import { useState, useMemo, useEffect } from "react";
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import type { Expense, Crop, ExpenseFormData } from "@/types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ import { Search, Plus, Calendar, ListChecks, ListTodo } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { createExpense } from "@/services/expenseService";
-
+import { useCropFilter } from "@/contexts/CropFilterContext";
 
 interface LinkedExpenseSelectorProps {
   expenses: Expense[];
@@ -29,37 +29,46 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
   crops,
   onExpenseAdded,
 }) => {
+  const { selectedCropId } = useCropFilter();
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isManualTotal, setIsManualTotal] = useState(false);
 
-  const {t} = useLanguage();
+  const { t } = useLanguage();
 
-  const getExpenseSchema = (t: (key: string) => string) => z.object({
-    crop_id: z.string().min(1, t('pleaseSelectCrop')),
-    cost: z.number().positive(t('costMustBePositive')),
-    unit: z.string().optional(),
-    amount: z.number().positive(t('amountMustBePositive')),
-    total: z.number().positive(t('totalMustBePositive')),
-    expense_date: z.string().min(1, t('dateRequired')),
-    category_name: z.string().min(1, t('categoryRequired')),
-    detail: z.string().optional(),
-  });
+  const getExpenseSchema = (t: (key: string) => string) =>
+    z.object({
+      crop_id: z.string().min(1, t("pleaseSelectCrop")),
+      cost: z.number().positive(t("costMustBePositive")),
+      unit: z.string().optional(),
+      amount: z.number().positive(t("amountMustBePositive")),
+      total: z.number().positive(t("totalMustBePositive")),
+      expense_date: z.string().min(1, t("dateRequired")),
+      category_name: z.string().min(1, t("categoryRequired")),
+      detail: z.string().optional(),
+    });
 
   const defaultValues: ExpenseFormData = {
-    expense_date: new Date().toISOString().split('T')[0],
+    expense_date: new Date().toISOString().split("T")[0],
     cost: 0,
-    unit: '',
+    unit: "",
     amount: 0,
     total: 0,
-    crop_id: '',
-    category_name: '',
-    detail: ''
+    crop_id: "",
+    category_name: "",
+    detail: "",
   };
 
-  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<ExpenseFormData>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<ExpenseFormData>({
     resolver: zodResolver(getExpenseSchema(t)),
-    defaultValues
+    defaultValues,
   });
 
   // Sort expenses by latest date and filter by search query
@@ -73,14 +82,14 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
           expense.categories?.name?.toLowerCase().includes(query) ||
           expense.crops?.name?.toLowerCase().includes(query) ||
           expense.detail?.toLowerCase().includes(query) ||
-          expense.total?.toString().includes(query)
+          expense.total?.toString().includes(query),
       );
     }
 
     // Sort by expense_date in descending order (latest first)
     return filtered.sort(
       (a, b) =>
-        new Date(b.expense_date).getTime() - new Date(a.expense_date).getTime()
+        new Date(b.expense_date).getTime() - new Date(a.expense_date).getTime(),
     );
   }, [expenses, searchQuery]);
 
@@ -92,10 +101,10 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
     }
   };
 
-  
-
   const handleSelectAll = () => {
-    const allExpenseIds = filteredAndSortedExpenses.map((expense) => expense.id);
+    const allExpenseIds = filteredAndSortedExpenses.map(
+      (expense) => expense.id,
+    );
     onSelectionChange(allExpenseIds);
   };
 
@@ -111,21 +120,23 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
     setIsManualTotal(false);
   };
 
-    // Watch cost and amount for automatic calculation
-  const watchedCost = watch('cost');
-  const watchedAmount = watch('amount');
+  // Watch cost and amount for automatic calculation
+  const watchedCost = watch("cost");
+  const watchedAmount = watch("amount");
   // Auto-calculate total when cost or amount changes, unless manually overridden
   useEffect(() => {
     if (!isManualTotal && watchedCost && watchedAmount) {
       const calculatedTotal = watchedCost * watchedAmount;
-      setValue('total', calculatedTotal);
+      setValue("total", calculatedTotal);
     }
   }, [watchedCost, watchedAmount, isManualTotal, setValue]);
-  
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <Label className="text-sm font-medium">{t('linkedExpenses')} {t('optional')}</Label>
+        <Label className="text-sm font-medium">
+          {t("linkedExpenses")} {t("optional")}
+        </Label>
         <div className="flex items-center gap-2">
           <Button
             type="button"
@@ -150,9 +161,12 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
             variant="outline"
             size="sm"
             onClick={() => {
-              setIsAddDialogOpen(true)
+              setIsAddDialogOpen(true);
               setIsManualTotal(false);
-              reset(defaultValues);
+              reset({
+                ...defaultValues,
+                crop_id: selectedCropId || "",
+              });
             }}
           >
             <Plus className="h-4 w-4 mr-1" />
@@ -166,7 +180,7 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
             }}
             onSave={handleSubmit(handleSaveExpense)}
             onDelete={() => {}}
-            title={t('addExpense')}
+            title={t("addExpense")}
             crops={crops}
             register={register}
             watch={watch}
@@ -174,6 +188,7 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
             errors={errors}
             isManualTotal={isManualTotal}
             setIsManualTotal={setIsManualTotal}
+            showDelete={false}
           />
         </div>
       </div>
@@ -195,13 +210,13 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
           {/* Selection Summary */}
           {selectedExpenseIds.length > 0 && (
             <div className="text-sm text-muted-foreground">
-              {selectedExpenseIds.length} {t('itemSelected')}
+              {selectedExpenseIds.length} {t("itemSelected")}
               {selectedExpenseIds.length > 0 && (
                 <span className="ml-2">
-                  ({t('total')}: ฿
+                  ({t("total")}: ฿
                   {expenses
                     .filter((expense) =>
-                      selectedExpenseIds.includes(expense.id)
+                      selectedExpenseIds.includes(expense.id),
                     )
                     .reduce((sum, expense) => sum + expense.total, 0)
                     .toFixed(2)}
@@ -260,7 +275,7 @@ const LinkedExpenseSelector: React.FC<LinkedExpenseSelectorProps> = ({
                               <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
                                 <Calendar className="h-3 w-3" />
                                 {new Date(
-                                  expense.expense_date
+                                  expense.expense_date,
                                 ).toLocaleDateString()}
                               </div>
                               {expense.detail && (
