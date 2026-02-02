@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { getDuration, formatArea, convertToSqm, convertFromSqm } from "@/lib/utils";
+import { convertFromSqm, convertToSqm, formatArea, getDuration } from "@/lib/utils";
 import {
   createCrop,
   deleteCrop,
@@ -84,7 +84,6 @@ const CropSettings = ({
     handleSubmit,
     reset,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<CropFormData>({
     // @ts-ignore - Skip type checking for resolver
@@ -92,7 +91,7 @@ const CropSettings = ({
     defaultValues,
   });
 
-  const watchedArea = watch("area");
+  // const watchedArea = watch("area");
 
   useEffect(() => {
     const fetchCrops = async () => {
