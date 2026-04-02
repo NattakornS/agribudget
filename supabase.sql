@@ -146,12 +146,47 @@ CREATE TABLE public.crop_shares (
 --   EXISTS (SELECT 1 FROM crop_shares WHERE crop_shares.crop_id = crops.id
 --     AND crop_shares.invitee_user_id = auth.uid() AND crop_shares.status = 'accepted')
 -- );
+-- expenses
 -- CREATE POLICY "shared crop expenses read" ON expenses FOR SELECT USING (
 --   EXISTS (SELECT 1 FROM crop_shares WHERE crop_shares.crop_id = expenses.crop_id
 --     AND crop_shares.invitee_user_id = auth.uid() AND crop_shares.status = 'accepted')
 -- );
--- CREATE POLICY "owner sees shared contributions" ON expenses FOR SELECT USING (
+-- CREATE POLICY "owner sees shared expenses" ON expenses FOR SELECT USING (
 --   EXISTS (SELECT 1 FROM crop_shares WHERE crop_shares.crop_id = expenses.crop_id
 --     AND crop_shares.owner_user_id = auth.uid() AND crop_shares.status = 'accepted')
 -- );
--- (Repeat "shared crop read" and "owner sees shared contributions" for income and fertilize_planner)
+-- income
+-- CREATE POLICY "shared crop income read" ON income FOR SELECT USING (
+--   EXISTS (SELECT 1 FROM crop_shares WHERE crop_shares.crop_id = income.crop_id
+--     AND crop_shares.invitee_user_id = auth.uid() AND crop_shares.status = 'accepted')
+-- );
+-- CREATE POLICY "owner sees shared income" ON income FOR SELECT USING (
+--   EXISTS (SELECT 1 FROM crop_shares WHERE crop_shares.crop_id = income.crop_id
+--     AND crop_shares.owner_user_id = auth.uid() AND crop_shares.status = 'accepted')
+-- );
+-- fertilize_planner
+-- CREATE POLICY "shared crop planner read" ON fertilize_planner FOR SELECT USING (
+--   EXISTS (SELECT 1 FROM crop_shares WHERE crop_shares.crop_id = fertilize_planner.crop_id
+--     AND crop_shares.invitee_user_id = auth.uid() AND crop_shares.status = 'accepted')
+-- );
+-- CREATE POLICY "owner sees shared planner" ON fertilize_planner FOR SELECT USING (
+--   EXISTS (SELECT 1 FROM crop_shares WHERE crop_shares.crop_id = fertilize_planner.crop_id
+--     AND crop_shares.owner_user_id = auth.uid() AND crop_shares.status = 'accepted')
+-- );
+--
+-- Categories: invitees must be able to read the owner's category names for joined expense/income rows
+-- CREATE POLICY "shared crop category read" ON categories FOR SELECT USING (
+--   user_id = auth.uid()
+--   OR EXISTS (
+--     SELECT 1 FROM expenses e
+--     INNER JOIN crop_shares cs ON cs.crop_id = e.crop_id
+--     WHERE e.category_id = categories.id
+--       AND cs.invitee_user_id = auth.uid() AND cs.status = 'accepted'
+--   )
+--   OR EXISTS (
+--     SELECT 1 FROM income i
+--     INNER JOIN crop_shares cs ON cs.crop_id = i.crop_id
+--     WHERE i.category_id = categories.id
+--       AND cs.invitee_user_id = auth.uid() AND cs.status = 'accepted'
+--   )
+-- );

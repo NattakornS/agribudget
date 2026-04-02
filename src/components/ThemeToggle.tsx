@@ -39,7 +39,7 @@ export const ThemeToggle: React.FC = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="w-full justify-center">
+        <Button variant="outline" size="sm" className="justify-center">
           {getIcon()}
           <span className="ml-2">{getLabel()}</span>
         </Button>
