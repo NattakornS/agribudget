@@ -24,9 +24,11 @@ import {
   MapPin,
   Plus,
   Ruler,
+  Share2,
   Sprout,
   Trash2
 } from "lucide-react";
+import CropSharingPanel from "@/components/CropSharingPanel";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -64,6 +66,7 @@ const CropSettings = ({
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCrop, setSelectedCrop] = useState<Crop | null>(null);
+  const [sharingCrop, setSharingCrop] = useState<Crop | null>(null);
   const [selectedMapLocation, setSelectedMapLocation] = useState<{
     lat: number;
     lng: number;
@@ -98,7 +101,8 @@ const CropSettings = ({
       try {
         setLoading(true);
         const data = await getCrops();
-        setCrops(data);
+        // Settings only manages owned crops, not shared ones
+        setCrops(data.filter((c: Crop) => !c._shared));
         setError(null);
       } catch (err: any) {
         setError(err.message);
@@ -118,7 +122,7 @@ const CropSettings = ({
   const refreshCrops = async () => {
     try {
       const data = await getCrops();
-      setCrops(data);
+      setCrops(data.filter((c: Crop) => !c._shared));
     } catch (err: any) {
       setError(err.message);
     }
@@ -330,6 +334,14 @@ const CropSettings = ({
                           <Button
                             variant="outline"
                             size="sm"
+                            onClick={() => setSharingCrop(crop)}
+                            title="Share crop"
+                          >
+                            <Share2 className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
                             onClick={() => handleOpenModal(crop)}
                           >
                             <Edit className="h-4 w-4" />
@@ -360,6 +372,20 @@ const CropSettings = ({
           </CardContent>
         </Card>
       </div>
+
+      {/* Sharing Modal */}
+      <EditModal
+        isOpen={!!sharingCrop}
+        onClose={() => setSharingCrop(null)}
+        onSave={() => setSharingCrop(null)}
+        onDelete={() => {}}
+        showDelete={false}
+        title={`Share: ${sharingCrop?.name ?? ''}`}
+      >
+        {sharingCrop && (
+          <CropSharingPanel cropId={sharingCrop.id} cropName={sharingCrop.name} />
+        )}
+      </EditModal>
 
       {/* <FloatingActionButton onClick={() => handleOpenModal()} /> */}
 

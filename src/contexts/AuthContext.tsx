@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { Session, User, AuthResponse, SignUpWithPasswordCredentials, Provider, OAuthResponse, UserIdentity } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabaseClient';
+import { claimPendingInvitationsByEmail } from '@/services/cropShareService';
 
 interface IAuthProvider {
   id: string;
@@ -56,6 +57,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setLoading(false);
         if (session?.user) {
           await refreshProviders();
+          if (_event === 'SIGNED_IN' && session.user.email) {
+            claimPendingInvitationsByEmail(session.user.email, session.user.id).catch(console.error);
+          }
         }
       }
     );
@@ -67,6 +71,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setLoading(false);
         if (session?.user) {
           await refreshProviders();
+          if (session.user.email) {
+            claimPendingInvitationsByEmail(session.user.email, session.user.id).catch(console.error);
+          }
         }
     });
 

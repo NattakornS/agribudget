@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/sidebar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCropFilter } from '@/contexts/CropFilterContext';
 import { DollarSign, LayoutDashboard, LogOut, PersonStanding, Sprout, Tractor } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -20,13 +21,14 @@ import ThemeToggle from './ThemeToggle';
 export function AppSidebar() {
   const { signOut } = useAuth();
   const { t } = useLanguage();
+  const { pendingInvitationCount } = useCropFilter();
 
   const navItems = [
-    { to: '/profile', name: t('profile'), icon: PersonStanding },
-    { to: '/', name: t('dashboardNav'), icon: LayoutDashboard },
-    { to: '/income', name: t('income'), icon: DollarSign },
-    { to: '/expenses', name: t('expenses'), icon: Tractor },
-    { to: '/planner', name: t('planner'), icon: Sprout },
+    { to: '/profile', name: t('profile'), icon: PersonStanding, badge: pendingInvitationCount },
+    { to: '/', name: t('dashboardNav'), icon: LayoutDashboard, badge: 0 },
+    { to: '/income', name: t('income'), icon: DollarSign, badge: 0 },
+    { to: '/expenses', name: t('expenses'), icon: Tractor, badge: 0 },
+    { to: '/planner', name: t('planner'), icon: Sprout, badge: 0 },
   ];
 
   return (
@@ -37,7 +39,7 @@ export function AppSidebar() {
           <h2 className="text-xl font-bold text-foreground">AgriBudget</h2>
         </div>
       </SidebarHeader>
-      
+
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>{t('navigation')}</SidebarGroupLabel>
@@ -47,13 +49,20 @@ export function AppSidebar() {
                     <NavLink
                       key={item.name}
                       to={item.to}
-                      className={({ isActive }) => 
+                      className={({ isActive }) =>
                         `flex items-center gap-3 w-full p-2 ${
                           isActive ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'hover:bg-accent/50'
                         }`
                       }
                     >
-                      <item.icon className="h-4 w-4" />
+                      <div className="relative">
+                        <item.icon className="h-4 w-4" />
+                        {item.badge > 0 && (
+                          <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center font-bold">
+                            {item.badge}
+                          </span>
+                        )}
+                      </div>
                       <span>{item.name}</span>
                     </NavLink>
               ))}
@@ -61,7 +70,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      
+
       <SidebarFooter>
         <Separator />
         <div className="p-4 space-y-2">

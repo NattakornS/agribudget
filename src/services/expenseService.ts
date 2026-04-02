@@ -1,8 +1,25 @@
 import { supabase } from '@/lib/supabaseClient';
 import type { ExpenseFormData } from '@/types';
 import { findOrCreateCategory } from './categoryService';
+import { getAcceptedSharedCropIds, getOwnedSharedCropIds } from './cropShareService';
 
 const TABLE_NAME = 'expenses';
+
+const EXPENSE_SELECT = `
+  id,
+  user_id,
+  created_at,
+  expense_date,
+  amount,
+  total,
+  unit,
+  cost,
+  detail,
+  crop_id,
+  crops ( name ),
+  category_id,
+  categories ( name )
+`;
 
 let inFlightGetExpenses: Promise<any> | null = null;
 
@@ -16,27 +33,36 @@ export const getExpenses = async () => {
     }
     const userId = sessionData.session.user.id;
 
-    const { data, error } = await supabase
+    const [ownResult, sharedWithMeIds, mySharedIds] = await Promise.all([
+      supabase
+        .from(TABLE_NAME)
+        .select(EXPENSE_SELECT)
+        .eq('user_id', userId)
+        .order('expense_date', { ascending: false }),
+      getAcceptedSharedCropIds(),
+      getOwnedSharedCropIds(),
+    ]);
+
+    if (ownResult.error) throw ownResult.error;
+
+    const allSharedCropIds = [...new Set([...sharedWithMeIds, ...mySharedIds])];
+
+    if (allSharedCropIds.length === 0) return ownResult.data ?? [];
+
+    const { data: crossData, error: crossError } = await supabase
       .from(TABLE_NAME)
-      .select(`
-        id,
-        created_at,
-        expense_date,
-        amount,
-        total,
-        unit,
-        cost,
-        detail,
-        crop_id,
-        crops ( name ),
-        category_id,
-        categories ( name )
-      `)
-      .eq('user_id', userId)
+      .select(EXPENSE_SELECT)
+      .in('crop_id', allSharedCropIds)
       .order('expense_date', { ascending: false });
 
-    if (error) throw error;
-    return data;
+    if (crossError) throw crossError;
+
+    const seen = new Set<string>();
+    return [...(ownResult.data ?? []), ...(crossData ?? [])].filter((e) => {
+      if (seen.has(e.id)) return false;
+      seen.add(e.id);
+      return true;
+    });
   })().finally(() => {
     inFlightGetExpenses = null;
   });

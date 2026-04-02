@@ -19,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { useCropFilter } from "@/contexts/CropFilterContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useYearFilter } from "@/contexts/YearFilterContext";
 import { getExpenses } from "@/services/expenseService";
 import {
@@ -38,6 +39,7 @@ import { z } from "zod";
 
 const IncomePage = () => {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const incomeSchema = z.object({
     crop_id: z.string().min(1, t("pleaseSelectCrop")),
     price: z.number().positive(t("priceMustBePositive")),
@@ -220,6 +222,8 @@ const IncomePage = () => {
 
   const handleOpenModal = (income?: Income) => {
     if (income) {
+      // Only the record owner can edit; other users' records are skipped
+      if (income.user_id && user?.id && income.user_id !== user.id) return;
       console.log(income);
 
       setSelectedIncome(income);

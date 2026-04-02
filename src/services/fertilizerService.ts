@@ -1,25 +1,51 @@
 import { supabase } from '@/lib/supabaseClient';
 import type { FertilizerPlanFormData, PlanStatus } from '@/types';
+import { getAcceptedSharedCropIds, getOwnedSharedCropIds } from './cropShareService';
 
 const PLANNER_TABLE = 'fertilize_planner';
 const JOIN_TABLE = 'fertilize_planner_expenses';
 
+const PLAN_SELECT = `
+  *,
+  crops ( name ),
+  fertilize_planner_expenses ( expenses ( id, expense_date, amount, detail ) )
+`;
+
 export const getFertilizerPlans = async () => {
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
   if (sessionError || !sessionData.session) throw new Error('User not authenticated');
+  const userId = sessionData.session.user.id;
 
-  const { data, error } = await supabase
+  const [ownResult, sharedWithMeIds, mySharedIds] = await Promise.all([
+    supabase
+      .from(PLANNER_TABLE)
+      .select(PLAN_SELECT)
+      .eq('user_id', userId)
+      .order('plan_date', { ascending: true }),
+    getAcceptedSharedCropIds(),
+    getOwnedSharedCropIds(),
+  ]);
+
+  if (ownResult.error) throw ownResult.error;
+
+  const allSharedCropIds = [...new Set([...sharedWithMeIds, ...mySharedIds])];
+
+  if (allSharedCropIds.length === 0) return ownResult.data ?? [];
+
+  const { data: crossData, error: crossError } = await supabase
     .from(PLANNER_TABLE)
-    .select(`
-      *,
-      crops ( name ),
-      fertilize_planner_expenses ( expenses ( id, expense_date, amount, detail ) )
-    `)
-    .eq('user_id', sessionData.session.user.id)
+    .select(PLAN_SELECT)
+    .in('crop_id', allSharedCropIds)
     .order('plan_date', { ascending: true });
 
-  if (error) throw error;
-  return data;
+  if (crossError) throw crossError;
+
+  const seen = new Set<string>();
+  return [...(ownResult.data ?? []), ...(crossData ?? [])].filter((e) => {
+    if (seen.has(e.id)) return false;
+    seen.add(e.id);
+    return true;
+  });
 };
 
 export const createFertilizerPlan = async (formData: FertilizerPlanFormData) => {

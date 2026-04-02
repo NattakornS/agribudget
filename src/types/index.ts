@@ -11,6 +11,7 @@ export interface Crop {
   amount?: number | null;
   started_date?: string | null;
   crop_type?: CropType | null;
+  _shared?: boolean; // transient flag: true when this crop is shared with the current user (not stored in DB)
 }
 export interface CropType {
   name?: string | null;
@@ -123,3 +124,17 @@ export type FertilizerPlanFormData = {
   amount_kg?: number;
   linked_expense_ids: string[];
 };
+
+export type CropShareStatus = 'pending' | 'accepted' | 'rejected';
+
+export interface CropShare {
+  id: string;
+  crop_id: string;
+  owner_user_id: string;
+  invitee_email: string;
+  invitee_user_id: string | null;
+  status: CropShareStatus;
+  created_at: string;
+  updated_at: string;
+  crops?: { id: string; name: string; crop_type?: CropType | null };
+}

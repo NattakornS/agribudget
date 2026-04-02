@@ -1,4 +1,5 @@
 import CropSettings from "@/components/CropSettings";
+import InvitationsPanel from "@/components/InvitationsPanel";
 import PageNavHeader from "@/components/PageNavHeader";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -424,6 +425,9 @@ const ProfilePage = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Pending Invitations */}
+      <InvitationsPanel />
 
       {/* Crop Settings Section */}
       <CropSettings

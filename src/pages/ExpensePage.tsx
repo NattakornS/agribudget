@@ -6,6 +6,7 @@ import RecordList from '@/components/RecordList';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCropFilter } from '@/contexts/CropFilterContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useYearFilter } from '@/contexts/YearFilterContext';
 import { createExpense, deleteExpense, getExpenses, updateExpense } from '@/services/expenseService';
 import type { Expense, ExpenseFormData } from '@/types';
@@ -32,6 +33,7 @@ const getExpenseSchema = (t: (key: string) => string) => z.object({
 
 const ExpensePage = () => {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const { selectedCropId, crops: contextCrops, selectedCrop } = useCropFilter();
   const crops = contextCrops;
@@ -162,6 +164,8 @@ const ExpensePage = () => {
 
   const handleOpenModal = (expense?: Expense) => {
     if (expense) {
+      // Only the record owner can edit; other users' records are skipped
+      if (expense.user_id && user?.id && expense.user_id !== user.id) return;
       console.log(expense);
       
       setSelectedExpense(expense);

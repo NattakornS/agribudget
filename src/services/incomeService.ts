@@ -1,9 +1,28 @@
 import { supabase } from '@/lib/supabaseClient';
 import type { IncomeFormData } from '@/types';
 import { findOrCreateCategory } from './categoryService';
+import { getAcceptedSharedCropIds, getOwnedSharedCropIds } from './cropShareService';
 
 const INCOME_TABLE = 'income';
 const JOIN_TABLE = 'income_expenses';
+
+const INCOME_SELECT = `
+  id,
+  user_id,
+  income_date,
+  sub_total,
+  detail,
+  crops ( name ),
+  crop_id,
+  price,
+  unit,
+  total,
+  amount,
+  categories ( name ),
+  income_expenses ( expenses ( id, expense_date, amount, detail, categories (name) ) )
+`;
+
+const mapIncomeRow = (el: any) => ({ ...el, expenses: el.income_expenses.map((eel: any) => eel.expenses) });
 
 let inFlightGetIncome: Promise<any> | null = null;
 
@@ -13,31 +32,38 @@ export const getIncome = async () => {
   inFlightGetIncome = (async () => {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !sessionData.session) throw new Error('User not authenticated');
+    const userId = sessionData.session.user.id;
 
-    const { data, error } = await supabase
+    const [ownResult, sharedWithMeIds, mySharedIds] = await Promise.all([
+      supabase
+        .from(INCOME_TABLE)
+        .select(INCOME_SELECT)
+        .eq('user_id', userId)
+        .order('income_date', { ascending: false }),
+      getAcceptedSharedCropIds(),
+      getOwnedSharedCropIds(),
+    ]);
+
+    if (ownResult.error) throw ownResult.error;
+
+    const allSharedCropIds = [...new Set([...sharedWithMeIds, ...mySharedIds])];
+
+    if (allSharedCropIds.length === 0) return (ownResult.data ?? []).map(mapIncomeRow);
+
+    const { data: crossData, error: crossError } = await supabase
       .from(INCOME_TABLE)
-      .select(`
-        id,
-        income_date,
-        sub_total,
-        detail,
-        crops ( name ),
-        crop_id,
-        price,
-        unit,
-        total,
-        amount,
-        categories ( name ),
-        income_expenses ( expenses ( id, expense_date, amount, detail, categories (name) ) )
-      `)
-      .eq('user_id', sessionData.session.user.id)
+      .select(INCOME_SELECT)
+      .in('crop_id', allSharedCropIds)
       .order('income_date', { ascending: false });
 
-    if (error) throw error;
-    const formData = data.map((el: any) => {
-      return { ...el, expenses: el.income_expenses.map((eel: any) => eel.expenses) };
-    });
-    return formData;
+    if (crossError) throw crossError;
+
+    const seen = new Set<string>();
+    return [...(ownResult.data ?? []), ...(crossData ?? [])].filter((e) => {
+      if (seen.has(e.id)) return false;
+      seen.add(e.id);
+      return true;
+    }).map(mapIncomeRow);
   })().finally(() => {
     inFlightGetIncome = null;
   });

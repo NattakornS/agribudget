@@ -16,6 +16,7 @@ import FloatingActionButton from '@/components/FloatingActionButton';
 import CropMap from '@/components/CropMap';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { formatArea, convertToSqm, convertFromSqm } from '@/lib/utils';
+import InvitationsPanel from '@/components/InvitationsPanel';
 
 const cropSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -186,6 +187,9 @@ const SettingsPage = () => {
           Manage your crops and farm plots
         </p>
       </div>
+
+      {/* Pending invitations */}
+      <InvitationsPanel />
 
       {/* Error Alert */}
       {error && (

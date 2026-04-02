@@ -28,22 +28,37 @@ This is an agricultural budget management application built with React, TypeScri
 
 ### Application Structure
 
+#### Context Provider Stack (nesting order in App.tsx)
+
+```text
+ThemeProvider → LanguageProvider → AuthProvider → CropFilterProvider → YearFilterProvider → Layout
+```
+
+- **ThemeContext**: `light | dark | system` theme persisted in localStorage; apply with `useTheme()`
+- **LanguageContext**: i18n for English/Thai. All UI strings must use `t(key)` from `useLanguage()`. When adding new strings, add to both `en` and `th` objects in `src/contexts/LanguageContext.tsx`. Falls back to English if Thai key is missing.
+- **CropFilterContext**: Global crop selection shared across pages; use `useCropFilter()`
+- **YearFilterContext**: Global year filter (0 = all years); use `useYearFilter()`
+
 #### Authentication Flow
+
 - Unauthenticated users are redirected to `/login`
 - Protected routes require authentication via `ProtectedRoute` component
-- AuthContext provides session state and auth methods throughout the app
+- `FirstTimeUserRedirect` wraps `Layout` to redirect new users to settings
 
 #### Layout & Navigation
-- **Desktop**: Sidebar navigation (`Sidebar` component)
-- **Mobile**: Bottom navigation (`BottomNav` component)  
+
+- **Desktop**: Sidebar navigation (`AppSidebar` using shadcn/ui sidebar primitives)
+- **Mobile**: Bottom navigation (`BottomNav` component)
 - **Layout**: Responsive design with `Layout` component managing both navigation types
 
 #### Core Pages & Features
+
 - **Dashboard** (`/`): Overview with charts and summaries
 - **Income** (`/income`): Track farm income by crop and category
-- **Expenses** (`/expenses`): Track farm expenses by crop and category  
+- **Expenses** (`/expenses`): Track farm expenses by crop and category
 - **Fertilizer Planner** (`/planner`): Plan and track fertilizer applications
-- **Settings** (`/settings`): User preferences and configuration
+- **Settings** (`/settings`): Crop management and user preferences
+- **Profile** (`/profile`): User account information and profile picture
 
 ### Database Schema
 

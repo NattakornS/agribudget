@@ -1,7 +1,23 @@
 import { supabase } from "@/lib/supabaseClient";
 import type { CropFormData } from "@/types";
+import { getAcceptedSharedCrops } from "@/services/cropShareService";
 
 const TABLE_NAME = "crops";
+
+const CROP_SELECT = `
+  id,
+  user_id,
+  created_at,
+  updated_at,
+  name,
+  location,
+  area,
+  amount,
+  started_date,
+  latitude,
+  longitude,
+  crop_type ( id, name, image )
+`;
 
 let inFlightGetCrops: Promise<any> | null = null;
 
@@ -16,24 +32,19 @@ export const getCrops = async () => {
     }
     const userId = sessionData.session.user.id;
 
-    const { data, error } = await supabase
-      .from(TABLE_NAME)
-      .select(`
-        id,
-        name,
-        location,
-        area,
-        amount,
-        started_date,
-        latitude,
-        longitude,
-        crop_type ( id, name, image )
-      `)
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
+    const [ownedResult, sharedCrops] = await Promise.all([
+      supabase
+        .from(TABLE_NAME)
+        .select(CROP_SELECT)
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false }),
+      getAcceptedSharedCrops(),
+    ]);
 
-    if (error) throw error;
-    return data;
+    if (ownedResult.error) throw ownedResult.error;
+
+    const owned = (ownedResult.data ?? []).map((c: any) => ({ ...c, _shared: false }));
+    return [...owned, ...sharedCrops];
   })().finally(() => {
     inFlightGetCrops = null;
   });
