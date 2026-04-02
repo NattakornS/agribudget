@@ -22,8 +22,8 @@ export const getFertilizerPlans = async () => {
       .select(PLAN_SELECT)
       .eq('user_id', userId)
       .order('plan_date', { ascending: true }),
-    getAcceptedSharedCropIds(),
-    getOwnedSharedCropIds(),
+    getAcceptedSharedCropIds().catch(() => []),
+    getOwnedSharedCropIds().catch(() => []),
   ]);
 
   if (ownResult.error) throw ownResult.error;

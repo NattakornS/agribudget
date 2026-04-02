@@ -38,7 +38,7 @@ export const getCrops = async () => {
         .select(CROP_SELECT)
         .eq("user_id", userId)
         .order("created_at", { ascending: false }),
-      getAcceptedSharedCrops(),
+      getAcceptedSharedCrops().catch(() => []),
     ]);
 
     if (ownedResult.error) throw ownedResult.error;

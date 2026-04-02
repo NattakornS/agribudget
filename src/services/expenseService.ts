@@ -39,8 +39,8 @@ export const getExpenses = async () => {
         .select(EXPENSE_SELECT)
         .eq('user_id', userId)
         .order('expense_date', { ascending: false }),
-      getAcceptedSharedCropIds(),
-      getOwnedSharedCropIds(),
+      getAcceptedSharedCropIds().catch(() => []),
+      getOwnedSharedCropIds().catch(() => []),
     ]);
 
     if (ownResult.error) throw ownResult.error;

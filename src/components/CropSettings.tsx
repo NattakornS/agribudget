@@ -101,8 +101,7 @@ const CropSettings = ({
       try {
         setLoading(true);
         const data = await getCrops();
-        // Settings only manages owned crops, not shared ones
-        setCrops(data.filter((c: Crop) => !c._shared));
+        setCrops(data);
         setError(null);
       } catch (err: any) {
         setError(err.message);
@@ -122,11 +121,14 @@ const CropSettings = ({
   const refreshCrops = async () => {
     try {
       const data = await getCrops();
-      setCrops(data.filter((c: Crop) => !c._shared));
+      setCrops(data);
     } catch (err: any) {
       setError(err.message);
     }
   };
+
+  const ownedCrops = crops.filter((c) => !c._shared);
+  const sharedCrops = crops.filter((c) => c._shared);
 
   const handleAddCrop = async (data: CropFormData) => {
     try {
@@ -278,7 +280,7 @@ const CropSettings = ({
             </div>
           </CardHeader>
           <CardContent className="max-h-96 overflow-y-auto">
-            {crops.length === 0 ? (
+            {ownedCrops.length === 0 && sharedCrops.length === 0 ? (
               <div className="text-center py-8">
                 <Sprout className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">{t("noCropsAdded")}</p>
@@ -288,7 +290,7 @@ const CropSettings = ({
               </div>
             ) : (
               <div className="grid gap-4">
-                {crops.map((crop) => (
+                {ownedCrops.map((crop) => (
                   <Card key={crop.id} className="border-l-4 border-l-green-500">
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start">
@@ -367,6 +369,53 @@ const CropSettings = ({
                     </CardContent>
                   </Card>
                 ))}
+
+                {/* Shared crops — read-only */}
+                {sharedCrops.length > 0 && (
+                  <>
+                    <div className="flex items-center gap-2 pt-2">
+                      <Share2 className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium text-muted-foreground">Shared with me</span>
+                    </div>
+                    {sharedCrops.map((crop) => (
+                      <Card key={crop.id} className="border-l-4 border-l-blue-400 opacity-90">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-lg mb-2">{crop.name}</h3>
+                              <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm text-muted-foreground">
+                                {crop.location && (
+                                  <div className="flex items-center gap-1">
+                                    <MapPin className="h-3 w-3" />
+                                    {crop.location}
+                                  </div>
+                                )}
+                                {crop.area && (
+                                  <div className="flex items-center gap-1">
+                                    <Ruler className="h-3 w-3" />
+                                    {formatArea(crop.area, language)}
+                                  </div>
+                                )}
+                                {crop.amount && (
+                                  <div className="flex items-center gap-1">
+                                    <Hash className="h-3 w-3" />
+                                    {crop.amount} {t("units")}
+                                  </div>
+                                )}
+                                {crop.started_date && (
+                                  <div className="flex gap-1">
+                                    <Calendar className="h-3 w-3" />
+                                    {new Date(crop.started_date).toLocaleDateString()} ({getDuration(crop.started_date, "", language)})
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </>
+                )}
               </div>
             )}
           </CardContent>

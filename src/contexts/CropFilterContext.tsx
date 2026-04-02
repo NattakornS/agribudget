@@ -37,7 +37,7 @@ export const CropFilterProvider = ({ children }: { children: ReactNode }) => {
       setLoading(true);
       const [cropsData, invitations] = await Promise.all([
         getCrops(),
-        getPendingInvitations(),
+        getPendingInvitations().catch(() => []),
       ]);
       setCrops(cropsData);
       setPendingInvitationCount(invitations.length);

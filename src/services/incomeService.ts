@@ -40,8 +40,8 @@ export const getIncome = async () => {
         .select(INCOME_SELECT)
         .eq('user_id', userId)
         .order('income_date', { ascending: false }),
-      getAcceptedSharedCropIds(),
-      getOwnedSharedCropIds(),
+      getAcceptedSharedCropIds().catch(() => []),
+      getOwnedSharedCropIds().catch(() => []),
     ]);
 
     if (ownResult.error) throw ownResult.error;
