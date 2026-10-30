@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useYearFilter } from '@/contexts/YearFilterContext';
 import { createExpense, deleteExpense, getExpenses, updateExpense } from '@/services/expenseService';
 import type { Expense, ExpenseFormData } from '@/types';
+import UserAvatar from '@/components/UserAvatar';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -19,6 +20,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle, Calendar } from 'lucide-react';
+import { getUserProfiles, type UserProfile } from '@/services/profileService';
 
 const getExpenseSchema = (t: (key: string) => string) => z.object({
   crop_id: z.string().min(1, t('pleaseSelectCrop')),
@@ -42,7 +44,8 @@ const ExpensePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [selectedCategory, setSelectedCategory] = useState(t('all'));
-  
+  const [userProfiles, setUserProfiles] = useState<Map<string, UserProfile>>(new Map());
+
   const { selectedYear, isAllYears } = useYearFilter();
 
   const defaultValues: ExpenseFormData = {
@@ -114,6 +117,9 @@ const ExpensePage = () => {
         setLoading(true);
         const expensesData = await getExpenses();
         setExpenses(expensesData as unknown as Expense[]);
+        const uniqueUserIds = [...new Set((expensesData as any[]).map((e) => e.user_id).filter(Boolean))];
+        const profiles = await getUserProfiles(uniqueUserIds).catch(() => []);
+        setUserProfiles(new Map(profiles.map((p) => [p.id, p])));
         setError(null);
       } catch (err: any) {
         setError(err.message);
@@ -197,10 +203,17 @@ const ExpensePage = () => {
   //   }
   // };
 
-  const renderExpenseItem = (expense: Expense) => (
+  const renderExpenseItem = (expense: Expense) => {
+    const profile = userProfiles.get(expense.user_id);
+    return (
     <div className="flex justify-between items-start">
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-2">
+          <UserAvatar
+            displayName={profile?.display_name}
+            avatarUrl={profile?.avatar_url}
+            size="sm"
+          />
           <h3 className="font-semibold text-foreground">
             {expense.categories?.name || t('uncategorized')}
           </h3>
@@ -223,6 +236,7 @@ const ExpensePage = () => {
       </div>
     </div>
   );
+  };
 
   if (loading) {
     return (

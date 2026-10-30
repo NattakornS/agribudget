@@ -29,6 +29,7 @@ import {
   updateIncome,
 } from "@/services/incomeService";
 import type { Expense, Income, IncomeFormData } from "@/types";
+import UserAvatar from "@/components/UserAvatar";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Calendar, TrendingUp } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -265,11 +266,15 @@ const IncomePage = () => {
   const renderIncomeItem = (income: Income) => {
     const linkedExpenses = getLinkedExpenses(income);
     // const netIncome = calculateNetIncome(income);
-
     return (
       <div className="flex justify-between items-start">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
+            <UserAvatar
+              displayName={income.profiles?.display_name}
+              avatarUrl={income.profiles?.avatar_url}
+              size="sm"
+            />
             <h3 className="font-semibold text-foreground">
               {income.categories?.name || "Uncategorized"}
             </h3>

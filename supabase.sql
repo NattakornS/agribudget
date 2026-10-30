@@ -146,31 +146,28 @@ CREATE TABLE public.crop_shares (
 --   EXISTS (SELECT 1 FROM crop_shares WHERE crop_shares.crop_id = crops.id
 --     AND crop_shares.invitee_user_id = auth.uid() AND crop_shares.status = 'accepted')
 -- );
--- expenses
--- CREATE POLICY "shared crop expenses read" ON expenses FOR SELECT USING (
---   EXISTS (SELECT 1 FROM crop_shares WHERE crop_shares.crop_id = expenses.crop_id
+-- expenses: own rows + any row on a shared crop (both directions)
+-- CREATE POLICY "read own and shared crop expenses" ON expenses FOR SELECT USING (
+--   user_id = auth.uid()
+--   OR EXISTS (SELECT 1 FROM crop_shares WHERE crop_shares.crop_id = expenses.crop_id
 --     AND crop_shares.invitee_user_id = auth.uid() AND crop_shares.status = 'accepted')
--- );
--- CREATE POLICY "owner sees shared expenses" ON expenses FOR SELECT USING (
---   EXISTS (SELECT 1 FROM crop_shares WHERE crop_shares.crop_id = expenses.crop_id
+--   OR EXISTS (SELECT 1 FROM crop_shares WHERE crop_shares.crop_id = expenses.crop_id
 --     AND crop_shares.owner_user_id = auth.uid() AND crop_shares.status = 'accepted')
 -- );
--- income
--- CREATE POLICY "shared crop income read" ON income FOR SELECT USING (
---   EXISTS (SELECT 1 FROM crop_shares WHERE crop_shares.crop_id = income.crop_id
+-- income: own rows + any row on a shared crop (both directions)
+-- CREATE POLICY "read own and shared crop income" ON income FOR SELECT USING (
+--   user_id = auth.uid()
+--   OR EXISTS (SELECT 1 FROM crop_shares WHERE crop_shares.crop_id = income.crop_id
 --     AND crop_shares.invitee_user_id = auth.uid() AND crop_shares.status = 'accepted')
--- );
--- CREATE POLICY "owner sees shared income" ON income FOR SELECT USING (
---   EXISTS (SELECT 1 FROM crop_shares WHERE crop_shares.crop_id = income.crop_id
+--   OR EXISTS (SELECT 1 FROM crop_shares WHERE crop_shares.crop_id = income.crop_id
 --     AND crop_shares.owner_user_id = auth.uid() AND crop_shares.status = 'accepted')
 -- );
--- fertilize_planner
--- CREATE POLICY "shared crop planner read" ON fertilize_planner FOR SELECT USING (
---   EXISTS (SELECT 1 FROM crop_shares WHERE crop_shares.crop_id = fertilize_planner.crop_id
+-- fertilize_planner: own rows + any row on a shared crop (both directions)
+-- CREATE POLICY "read own and shared crop planner" ON fertilize_planner FOR SELECT USING (
+--   user_id = auth.uid()
+--   OR EXISTS (SELECT 1 FROM crop_shares WHERE crop_shares.crop_id = fertilize_planner.crop_id
 --     AND crop_shares.invitee_user_id = auth.uid() AND crop_shares.status = 'accepted')
--- );
--- CREATE POLICY "owner sees shared planner" ON fertilize_planner FOR SELECT USING (
---   EXISTS (SELECT 1 FROM crop_shares WHERE crop_shares.crop_id = fertilize_planner.crop_id
+--   OR EXISTS (SELECT 1 FROM crop_shares WHERE crop_shares.crop_id = fertilize_planner.crop_id
 --     AND crop_shares.owner_user_id = auth.uid() AND crop_shares.status = 'accepted')
 -- );
 --

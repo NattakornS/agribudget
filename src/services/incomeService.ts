@@ -19,10 +19,14 @@ const INCOME_SELECT = `
   total,
   amount,
   categories ( name ),
-  income_expenses ( expenses ( id, expense_date, amount, detail, categories (name) ) )
+  income_expenses ( expenses ( id, expense_date, amount, detail, categories (name) ) ),
+  profiles!user_id (display_name,avatar_url)
 `;
 
-const mapIncomeRow = (el: any) => ({ ...el, expenses: el.income_expenses.map((eel: any) => eel.expenses) });
+const mapIncomeRow = (el: any) => ({
+  ...el,
+  expenses: el.income_expenses.map((eel: any) => eel.expenses),
+});
 
 let inFlightGetIncome: Promise<any> | null = null;
 

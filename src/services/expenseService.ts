@@ -18,7 +18,8 @@ const EXPENSE_SELECT = `
   crop_id,
   crops ( name ),
   category_id,
-  categories ( name )
+  categories ( name ),
+  profiles (id, display_name,avatar_url)
 `;
 
 let inFlightGetExpenses: Promise<any> | null = null;

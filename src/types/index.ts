@@ -76,6 +76,7 @@ export interface Income {
   // For display
   crops?: { name: string };
   categories?: { name: string };
+  profiles?: { display_name: string | null; avatar_url: string | null } | null;
   // This will hold the linked expenses after we fetch them
   expenses?: Expense[];
 }
